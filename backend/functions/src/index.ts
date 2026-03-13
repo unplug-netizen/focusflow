@@ -6,6 +6,14 @@
 
 import * as functions from 'firebase-functions';
 
+// Export services for external use
+export {LeaderboardService, leaderboardService} from './services/leaderboardService';
+export {PushNotificationService, pushNotificationService} from './services/pushNotificationService';
+export {AppUsageTracker, appUsageTracker} from './services/appUsageTracker';
+export {BadgeVerificationSystem, createBadgeVerificationSystem} from './services/badgeVerificationSystem';
+export {AnalyticsService, analyticsService} from './services/analyticsService';
+export {ChallengeService, createChallengeService} from './services/challengeService';
+
 // Firestore triggers
 import {
   onUserStatsUpdate,
@@ -41,6 +49,19 @@ import {
   getWeeklyStats,
 } from './triggers/httpFunctions';
 
+// Additional HTTP functions
+import {
+  getUserProfile,
+  updateUserProfile,
+  startFocusSession,
+  completeFocusSession,
+  logBlockedAttempt,
+  getAllRanks,
+  getFriendsLeaderboard,
+  sendTestNotification,
+  getAppInsights,
+} from './triggers/additionalFunctions';
+
 // Export Firestore triggers
 export {
   onUserStatsUpdate,
@@ -74,6 +95,19 @@ export {
   updateNotificationPreferences,
   getDailyStats,
   getWeeklyStats,
+};
+
+// Export additional HTTP functions
+export {
+  getUserProfile,
+  updateUserProfile,
+  startFocusSession,
+  completeFocusSession,
+  logBlockedAttempt,
+  getAllRanks,
+  getFriendsLeaderboard,
+  sendTestNotification,
+  getAppInsights,
 };
 
 // Export config for Firebase
