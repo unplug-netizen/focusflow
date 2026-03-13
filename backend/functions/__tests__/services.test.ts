@@ -1,13 +1,13 @@
 /**
- * Einfache Tests für die Backend-Services
+ * Integration Tests für Backend Services
  * 
- * Diese Tests überprüfen, dass die Services korrekt instanziiert werden können
- * und die grundlegenden Funktionen exportiert werden.
+ * Diese Tests prüfen die grundlegende Funktionalität der Services
+ * ohne komplexe Firebase-Mocking-Strukturen.
  */
 
-import {AppUsageTracker} from '../src/services/appUsageTracker';
 import {LeaderboardService} from '../src/services/leaderboardService';
 import {PushNotificationService} from '../src/services/pushNotificationService';
+import {AppUsageTracker} from '../src/services/appUsageTracker';
 import {
   BadgeVerificationSystem,
   createBadgeVerificationSystem,
@@ -21,20 +21,12 @@ jest.mock('../src/config/firebase', () => ({
     increment: jest.fn((n: number) => n),
   },
   Timestamp: {
-    now: jest.fn(() => new Date()),
+    now: jest.fn(() => ({toDate: () => new Date()})),
     fromDate: jest.fn((date: Date) => date),
   },
 }));
 
-describe('Backend Services', () => {
-  describe('AppUsageTracker', () => {
-    it('should create an instance', () => {
-      const tracker = new AppUsageTracker();
-      expect(tracker).toBeDefined();
-      expect(tracker).toBeInstanceOf(AppUsageTracker);
-    });
-  });
-
+describe('Backend Services Integration', () => {
   describe('LeaderboardService', () => {
     it('should create an instance', () => {
       const service = new LeaderboardService();
@@ -77,6 +69,14 @@ describe('Backend Services', () => {
       types.forEach((type) => {
         expect(type).toBeDefined();
       });
+    });
+  });
+
+  describe('AppUsageTracker', () => {
+    it('should create an instance', () => {
+      const tracker = new AppUsageTracker();
+      expect(tracker).toBeDefined();
+      expect(tracker).toBeInstanceOf(AppUsageTracker);
     });
   });
 
@@ -124,6 +124,56 @@ describe('Backend Services', () => {
       expectedBadges.forEach((id) => {
         expect(badgeIds).toContain(id);
       });
+    });
+
+    it('should have valid badge requirements', () => {
+      BadgeVerificationSystem.DEFAULT_BADGES.forEach((badge) => {
+        expect(badge.requirement.type).toBeDefined();
+        const validTypes = [
+          'streak',
+          'focus_time',
+          'blocked_time',
+          'social_detox',
+          'digital_sabbath',
+          'early_bird',
+          'weekend_warrior',
+          'bedtime',
+        ];
+        expect(validTypes).toContain(badge.requirement.type);
+      });
+    });
+
+    it('should have positive rewards for all badges', () => {
+      BadgeVerificationSystem.DEFAULT_BADGES.forEach((badge) => {
+        expect(badge.reward).toBeGreaterThan(0);
+      });
+    });
+
+    it('should have higher rewards for higher tiers', () => {
+      const tierValues: Record<string, number> = {
+        bronze: 10,
+        silver: 25,
+        gold: 50,
+        platinum: 100,
+      };
+
+      BadgeVerificationSystem.DEFAULT_BADGES.forEach((badge) => {
+        expect(badge.reward).toBeGreaterThanOrEqual(tierValues[badge.tier] || 0);
+      });
+    });
+  });
+
+  describe('Service Integration', () => {
+    it('should have consistent service exports', () => {
+      const leaderboardService = new LeaderboardService();
+      const pushNotificationService = new PushNotificationService();
+      const appUsageTracker = new AppUsageTracker();
+      const badgeSystem = createBadgeVerificationSystem(pushNotificationService);
+
+      expect(leaderboardService).toBeDefined();
+      expect(pushNotificationService).toBeDefined();
+      expect(appUsageTracker).toBeDefined();
+      expect(badgeSystem).toBeDefined();
     });
   });
 });
