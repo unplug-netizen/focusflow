@@ -45,15 +45,12 @@ export const FocusModeScreen: React.FC = () => {
       intervalRef.current = setInterval(() => {
         dispatch(tick());
       }, 1000);
-    } else {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
     }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, [timer.status, dispatch]);

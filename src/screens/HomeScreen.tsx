@@ -19,13 +19,13 @@ export const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const {user} = useSelector((state: RootState) => state.auth);
-  const stats = useSelector((state: RootState) => state.stats);
+  const {totalFocusTime, focusCoins, currentStreak, badges} = useSelector((state: RootState) => state.stats);
   const {timer} = useSelector((state: RootState) => state.focusMode);
   const {rules} = useSelector((state: RootState) => state.appBlocker);
 
   const activeRules = rules.filter(r => r.isActive).length;
   const dailyGoal = 120; // 2 hours in minutes
-  const dailyProgress = Math.min((stats.totalFocusTime / dailyGoal) * 100, 100);
+  const dailyProgress = Math.min((totalFocusTime / dailyGoal) * 100, 100);
 
   return (
     <SafeAreaView
@@ -47,7 +47,7 @@ export const HomeScreen: React.FC = () => {
           <TouchableOpacity style={styles.coinsContainer}>
             <Text style={styles.coinIcon}>🪙</Text>
             <Text style={[styles.coins, {color: theme.colors.primary}]}>
-              {stats.focusCoins}
+              {focusCoins}
             </Text>
           </TouchableOpacity>
         </View>
@@ -60,14 +60,14 @@ export const HomeScreen: React.FC = () => {
             </Text>
             <Text
               style={[styles.goalValue, {color: theme.colors.textSecondary}]}>
-              {Math.floor(stats.totalFocusTime / 60)}h{' '}
-              {stats.totalFocusTime % 60}m / 2h
+              {Math.floor(totalFocusTime / 60)}h{' '}
+              {totalFocusTime % 60}m / 2h
             </Text>
           </View>
           <ProgressBar progress={dailyProgress} showPercentage={false} />
           <Text
             style={[styles.goalSubtitle, {color: theme.colors.textSecondary}]}>
-            Noch {Math.max(0, dailyGoal - stats.totalFocusTime)} Minuten bis zum
+            Noch {Math.max(0, dailyGoal - totalFocusTime)} Minuten bis zum
             Ziel
           </Text>
         </Card>
@@ -116,18 +116,18 @@ export const HomeScreen: React.FC = () => {
         <View style={styles.statsGrid}>
           <StatCard
             title="Fokus Zeit"
-            value={`${Math.floor(stats.totalFocusTime / 60)}h`}
-            subtitle={`${stats.totalFocusTime % 60}m heute`}
+            value={`${Math.floor(totalFocusTime / 60)}h`}
+            subtitle={`${totalFocusTime % 60}m heute`}
             icon="🎯"
             trend="up"
             trendValue="+12%"
           />
           <StatCard
             title="Streak"
-            value={stats.currentStreak}
+            value={currentStreak}
             subtitle="Tage am Stück"
             icon="🔥"
-            progress={stats.currentStreak}
+            progress={currentStreak}
             progressTotal={30}
           />
         </View>
@@ -228,7 +228,7 @@ export const HomeScreen: React.FC = () => {
             horizontal
             showsHorizontalScrollIndicator={false}
             style={styles.badgesScroll}>
-            {stats.badges
+            {badges
               .filter(b => b.unlockedAt)
               .slice(0, 5)
               .map(badge => (

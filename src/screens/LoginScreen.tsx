@@ -29,7 +29,36 @@ export const LoginScreen: React.FC = () => {
     dispatch(signInAnonymously());
   };
 
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleEmailAuth = () => {
+    setValidationError(null);
+
+    if (!email.trim()) {
+      setValidationError('Bitte gib eine E-Mail-Adresse ein');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setValidationError('Bitte gib eine gültige E-Mail-Adresse ein');
+      return;
+    }
+
+    if (!password || password.length < 6) {
+      setValidationError('Das Passwort muss mindestens 6 Zeichen lang sein');
+      return;
+    }
+
+    if (isSignUp && !displayName.trim()) {
+      setValidationError('Bitte gib einen Namen ein');
+      return;
+    }
+
     if (isSignUp) {
       dispatch(signUpWithEmail({email, password, displayName}));
     } else {
@@ -91,9 +120,9 @@ export const LoginScreen: React.FC = () => {
               secureTextEntry
             />
 
-            {error && (
+            {(error || validationError) && (
               <Text style={[styles.error, {color: theme.colors.error}]}>
-                {error}
+                {validationError || error}
               </Text>
             )}
 
