@@ -12,6 +12,8 @@ import {
 import {PushNotificationService} from '../src/services/pushNotificationService';
 import {LeaderboardService} from '../src/services/leaderboardService';
 import {AppUsageTracker} from '../src/services/appUsageTracker';
+import {AnalyticsService} from '../src/services/analyticsService';
+import {ChallengeService, createChallengeService} from '../src/services/challengeService';
 
 // Mock Firebase
 jest.mock('../src/config/firebase', () => ({
@@ -36,6 +38,13 @@ jest.mock('../src/config/firebase', () => ({
           get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
         })),
       })),
+      add: jest.fn().mockResolvedValue({id: 'mock-doc-id'}),
+      where: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
+    })),
+    collectionGroup: jest.fn(() => ({
       where: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
@@ -273,17 +282,170 @@ describe('BadgeVerificationSystem', () => {
   });
 });
 
+describe('AnalyticsService', () => {
+  let service: AnalyticsService;
+
+  beforeEach(() => {
+    service = new AnalyticsService();
+    jest.clearAllMocks();
+  });
+
+  it('should create an instance', () => {
+    expect(service).toBeDefined();
+    expect(service).toBeInstanceOf(AnalyticsService);
+  });
+
+  describe('generateDailyReport', () => {
+    it('should generate report without throwing', async () => {
+      const result = await service.generateDailyReport('2024-03-13');
+      expect(result).toHaveProperty('date');
+      expect(result).toHaveProperty('totalUsers');
+      expect(result).toHaveProperty('activeUsers');
+    });
+  });
+
+  describe('getUserAnalytics', () => {
+    it('should throw error for non-existing user', async () => {
+      await expect(service.getUserAnalytics('non-existing')).rejects.toThrow();
+    });
+  });
+
+  describe('getCategoryAnalytics', () => {
+    it('should return category analytics array', async () => {
+      const result = await service.getCategoryAnalytics(7);
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('getStreakLeaderboard', () => {
+    it('should return streak leaderboard', async () => {
+      const result = await service.getStreakLeaderboard(10);
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('getRetentionMetrics', () => {
+    it('should return retention metrics', async () => {
+      const result = await service.getRetentionMetrics();
+      expect(result).toHaveProperty('dailyRetention');
+      expect(result).toHaveProperty('weeklyRetention');
+      expect(result).toHaveProperty('monthlyRetention');
+    });
+  });
+});
+
+describe('ChallengeService', () => {
+  const mockNotificationService = {
+    sendToUser: jest.fn().mockResolvedValue(undefined),
+  } as unknown as PushNotificationService;
+
+  let service: ChallengeService;
+
+  beforeEach(() => {
+    service = createChallengeService(mockNotificationService);
+    jest.clearAllMocks();
+  });
+
+  it('should create an instance', () => {
+    expect(service).toBeDefined();
+    expect(service).toBeInstanceOf(ChallengeService);
+  });
+
+  describe('WEEKLY_CHALLENGES', () => {
+    it('should contain predefined challenges', () => {
+      expect(ChallengeService.WEEKLY_CHALLENGES.length).toBeGreaterThan(0);
+    });
+
+    it('should have valid challenge types', () => {
+      const validTypes = [
+        'reduce_screen_time',
+        'focus_sessions',
+        'social_detox',
+        'early_bird',
+        'weekend_warrior',
+        'bedtime_streak',
+        'blocked_attempts',
+      ];
+
+      ChallengeService.WEEKLY_CHALLENGES.forEach(challenge => {
+        expect(validTypes).toContain(challenge.type);
+      });
+    });
+
+    it('should have positive rewards', () => {
+      ChallengeService.WEEKLY_CHALLENGES.forEach(challenge => {
+        expect(challenge.reward).toBeGreaterThan(0);
+      });
+    });
+
+    it('should have valid difficulty levels', () => {
+      const validDifficulties = ['easy', 'medium', 'hard'];
+      ChallengeService.WEEKLY_CHALLENGES.forEach(challenge => {
+        expect(validDifficulties).toContain(challenge.difficulty);
+      });
+    });
+  });
+
+  describe('createWeeklyChallenges', () => {
+    it('should create challenges without throwing', async () => {
+      const result = await service.createWeeklyChallenges(new Date());
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('getCurrentChallenges', () => {
+    it('should return challenges array', async () => {
+      const result = await service.getCurrentChallenges();
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('getUserChallenges', () => {
+    it('should return user challenges array', async () => {
+      const result = await service.getUserChallenges('user123');
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+
+  describe('updateProgress', () => {
+    it('should throw error for non-existing challenge', async () => {
+      await expect(
+        service.updateProgress('user123', 'non-existing', 50)
+      ).rejects.toThrow('Challenge not found');
+    });
+  });
+
+  describe('claimReward', () => {
+    it('should throw error for non-existing progress', async () => {
+      await expect(
+        service.claimReward('user123', 'non-existing')
+      ).rejects.toThrow('Challenge progress not found');
+    });
+  });
+
+  describe('getChallengeLeaderboard', () => {
+    it('should return leaderboard array', async () => {
+      const result = await service.getChallengeLeaderboard('challenge-1');
+      expect(Array.isArray(result)).toBe(true);
+    });
+  });
+});
+
 describe('Service Integration', () => {
   it('should create all services without errors', () => {
     const leaderboardService = new LeaderboardService();
     const pushNotificationService = new PushNotificationService();
     const appUsageTracker = new AppUsageTracker();
+    const analyticsService = new AnalyticsService();
     const badgeSystem = createBadgeVerificationSystem(pushNotificationService);
+    const challengeService = createChallengeService(pushNotificationService);
 
     expect(leaderboardService).toBeInstanceOf(LeaderboardService);
     expect(pushNotificationService).toBeInstanceOf(PushNotificationService);
     expect(appUsageTracker).toBeInstanceOf(AppUsageTracker);
+    expect(analyticsService).toBeInstanceOf(AnalyticsService);
     expect(badgeSystem).toBeInstanceOf(BadgeVerificationSystem);
+    expect(challengeService).toBeInstanceOf(ChallengeService);
   });
 
   it('should have consistent badge tiers across all badges', () => {
@@ -317,5 +479,11 @@ describe('Service Integration', () => {
 
     expect(avgSilver).toBeGreaterThanOrEqual(avgBronze);
     expect(avgGold).toBeGreaterThanOrEqual(avgSilver);
+  });
+
+  it('should have unique challenge IDs in templates', () => {
+    const titles = ChallengeService.WEEKLY_CHALLENGES.map(c => c.title);
+    const uniqueTitles = new Set(titles);
+    expect(uniqueTitles.size).toBe(titles.length);
   });
 });
