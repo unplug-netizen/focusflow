@@ -2,96 +2,66 @@
 
 **Review Date:** 2026-03-13  
 **Reviewer:** FocusFlow Code-Reviewer Agent  
-**Repository:** https://github.com/unplug-netizen/focusflow
+**Repository:** /data/.openclaw/workspace/focusflow/
 
 ---
 
-## 📊 Zusammenfassung
+## Executive Summary
 
-| Kategorie | Bewertung | Status |
-|-----------|-----------|--------|
-| TypeScript-Typisierung | ⭐⭐⭐⭐⭐ (5/5) | ✅ Exzellent |
-| Code-Qualität | ⭐⭐⭐⭐☆ (4/5) | ✅ Gut |
-| Fehlerbehandlung | ⭐⭐⭐⭐☆ (4/5) | ✅ Gut |
-| Performance | ⭐⭐⭐⭐☆ (4/5) | ✅ Gut |
-| Sicherheit | ⭐⭐⭐⭐⭐ (5/5) | ✅ Exzellent |
-| Test-Abdeckung | ⭐⭐⭐☆☆ (3/5) | ⚠️ Verbesserbar |
-| Dokumentation | ⭐⭐⭐⭐☆ (4/5) | ✅ Gut |
+Die FocusFlow App zeigt insgesamt eine **gute Code-Qualität** mit moderner Architektur und klaren Strukturen. Das Projekt ist gut organisiert, verwendet aktuelle Technologien (React Native 0.73.6, TypeScript, Redux Toolkit, Firebase) und folgt weitgehend Best Practices.
 
-**Gesamtbewertung: 4.1/5** - Solide Codebasis mit guten Grundlagen
+### Gesamtbewertung: 7.5/10 ⭐
 
 ---
 
-## ✅ Positive Aspekte
+## Positive Aspekte ✅
 
-### 1. TypeScript-Typisierung (Exzellent)
-- **Strikte Typen** konsequent verwendet (`strict: true` in tsconfig.json)
-- Klare Interface-Definitionen in `src/types/index.ts`
-- Redux-Store mit korrekten Typ-Exports (`RootState`, `AppDispatch`)
-- Async-Thunks mit ordentlicher Fehlerbehandlung via `rejectWithValue`
+### 1. Projektstruktur & Organisation
+- **Klare Trennung** zwischen Frontend (React Native) und Backend (Firebase Functions)
+- **Konsistente Ordnerstruktur** mit `src/components/`, `src/screens/`, `src/store/`, `src/theme/`, `src/types/`
+- **Barrel exports** (`index.ts`) für saubere Importe
+- Backend-Services sind gut modularisiert
 
-### 2. Projektstruktur
-```
-src/
-├── components/       # Wiederverwendbare UI-Komponenten
-├── screens/          # Screen-Komponenten
-├── store/            # Redux Store mit Slices
-├── theme/            # Theme-Kontext (Light/Dark)
-└── types/            # Zentrale Typ-Definitionen
-```
-- Klare Trennung der Verantwortlichkeiten
-- Konsistente Datei-Namen-Konventionen (PascalCase für Komponenten, camelCase für Slices)
-- Index-Exports für saubere Importe
+### 2. TypeScript-Typisierung
+- **Strikte Typisierung** in den meisten Dateien
+- Zentrale Typdefinitionen in `src/types/index.ts`
+- Gute Verwendung von Interfaces für Props und State
+- Backend: `tsconfig.json` mit `strict: true`
 
 ### 3. State Management
-- Redux Toolkit mit guter Slice-Struktur
-- Redux Persist für Offline-Fähigkeit
-- Selektive Persistenz (whitelist in store/index.ts)
-- Serialisierbarkeits-Checks korrekt konfiguriert
+- **Redux Toolkit** für modernes, boilerplate-armes State Management
+- **Redux Persist** für lokale Datenspeicherung
+- Slice-basierte Architektur (`authSlice`, `focusModeSlice`, etc.)
+- Async Thunks für API-Operationen
 
-### 4. Theme-System
-- Context-basiertes Theme mit Light/Dark Mode
-- Konsistente Farbpalette
-- Dynamischer Theme-Wechsel
+### 4. Backend-Architektur
+- **Service-Oriented Architecture** mit klar getrennten Services
+- Umfassende Firebase Cloud Functions
+- Gute Fehlerbehandlung in HTTP Functions
+- Authentifizierungs-Checks auf allen geschützten Endpunkten
 
-### 5. Backend-Architektur
-- Firebase Cloud Functions mit sauberer Modularisierung
-- Service-Oriented Architecture (Leaderboard, PushNotification, BadgeVerification)
-- Umfassende HTTP-Callable Functions
-- Scheduled Functions für periodische Tasks
+### 5. Testing
+- Jest-Tests für Backend-Funktionen vorhanden
+- Mock-Implementierungen für Firebase
+- Tests für Badge-Validierung und Service-Exports
 
-### 6. Sicherheit
-- Keine hartkodierten Secrets im Code
-- Firebase Auth korrekt implementiert
-- HTTPS-Callable Functions mit Auth-Checks
-- Input-Validierung in Backend-Funktionen
+### 6. UI/UX
+- Konsistentes Design-System mit ThemeContext
+- Dark/Light Mode Unterstützung
+- Wiederverwendbare UI-Komponenten (Button, Card, Input)
+- Gute TypeScript-Integration in Komponenten
 
 ---
 
-## ⚠️ Gefundene Probleme
+## Gefundene Probleme 🔍
 
-### 🔴 Kritisch (0)
+### KRITISCH 🔴
 
-Keine kritischen Probleme gefunden.
+#### 1. Timer Memory Leak in `FocusModeScreen.tsx`
+**Datei:** `src/screens/FocusModeScreen.tsx` (Zeilen 45-58)
 
-### 🟡 Warnungen (7)
-
-#### 1. **Timer Memory Leak Risk** (FocusModeScreen.tsx)
 ```typescript
-// Aktueller Code:
-useEffect(() => {
-  if (timer.status === 'running') {
-    intervalRef.current = setInterval(() => {
-      dispatch(tick());
-    }, 1000);
-  }
-  // ...
-}, [timer.status, dispatch]);
-```
-**Problem:** Der Interval wird bei jedem Status-Wechsel neu erstellt. Bei schnellen Status-Änderungen können mehrere Intervalle aktiv sein.
-
-**Empfohlene Lösung:**
-```typescript
+// Problem: Das Interval wird nicht korrekt bereinigt
 useEffect(() => {
   if (timer.status === 'running') {
     intervalRef.current = setInterval(() => {
@@ -100,236 +70,269 @@ useEffect(() => {
   } else {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
-      intervalRef.current = null;
     }
   }
+  // ...
+}, [timer.status, dispatch]);
+```
 
+**Problem:** Wenn `timer.status` von 'running' zu 'paused' wechselt, wird das Interval zwar gelöscht, aber bei schnellen Status-Änderungen kann es zu Race Conditions kommen.
+
+**Empfohlene Lösung:**
+```typescript
+useEffect(() => {
+  if (timer.status === 'running') {
+    intervalRef.current = setInterval(() => {
+      dispatch(tick());
+    }, 1000);
+  }
+  
   return () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
   };
 }, [timer.status, dispatch]);
 ```
 
-#### 2. **Fehlende Error Boundary**
-Die App hat keine React Error Boundary implementiert. Ein Fehler in einer Komponente könnte die gesamte App zum Absturz bringen.
+#### 2. Unnötige Re-Renders durch Inline-Objekte
+**Datei:** `src/screens/HomeScreen.tsx` (Zeile 15)
+
+```typescript
+const stats = useSelector((state: RootState) => state.stats);
+```
+
+**Problem:** Der Selector gibt das gesamte Stats-Objekt zurück, was bei jeder Änderung eines beliebigen Feldes zu Re-Renders führt.
 
 **Empfohlene Lösung:**
 ```typescript
-// components/ErrorBoundary.tsx
-export class ErrorBoundary extends React.Component {
+const totalFocusTime = useSelector((state: RootState) => state.stats.totalFocusTime);
+const focusCoins = useSelector((state: RootState) => state.stats.focusCoins);
+const currentStreak = useSelector((state: RootState) => state.stats.currentStreak);
+```
+
+#### 3. Fehlende Input-Validierung in `LoginScreen.tsx`
+**Datei:** `src/screens/LoginScreen.tsx`
+
+**Problem:** Keine clientseitige Validierung von E-Mail und Passwort vor dem Dispatch.
+
+**Empfohlene Lösung:**
+```typescript
+const handleEmailAuth = () => {
+  if (!email.trim() || !email.includes('@')) {
+    // Zeige Fehler: Ungültige E-Mail
+    return;
+  }
+  if (!password || password.length < 6) {
+    // Zeige Fehler: Passwort zu kurz
+    return;
+  }
+  // ... Dispatch
+};
+```
+
+---
+
+### WARNUNG 🟡
+
+#### 4. TypeScript `any` in Error-Handling
+**Dateien:** Mehrere Backend-Dateien
+
+```typescript
+} catch (error: any) {
+  return rejectWithValue(error.message);
+}
+```
+
+**Problem:** Verwendung von `any` schwächt die Type-Sicherheit.
+
+**Empfohlene Lösung:**
+```typescript
+} catch (error) {
+  const message = error instanceof Error ? error.message : 'Unknown error';
+  return rejectWithValue(message);
+}
+```
+
+#### 5. Fehlende Error Boundaries
+**Problem:** Keine React Error Boundaries implementiert für graceful error handling.
+
+**Empfohlene Lösung:**
+```typescript
+// ErrorBoundary.tsx
+class ErrorBoundary extends React.Component {
   state = { hasError: false };
   
   static getDerivedStateFromError() {
     return { hasError: true };
   }
   
-  componentDidCatch(error, errorInfo) {
-    console.error('Error:', error, errorInfo);
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('Error:', error, info);
   }
   
   render() {
     if (this.state.hasError) {
-      return <ErrorFallback />;
+      return <FallbackUI />;
     }
     return this.props.children;
   }
 }
 ```
 
-#### 3. **Unvollständige Test-Abdeckung**
-- Nur Backend-Tests vorhanden (13 Tests)
-- Keine Frontend-Tests für React Native Komponenten
-- Keine Integration-Tests
-- Keine E2E-Tests
+#### 6. Hardcoded Werte
+**Datei:** `src/screens/HomeScreen.tsx` (Zeile 20)
 
-**Empfohlene Lösung:**
-```bash
-# React Native Testing Library hinzufügen
-npm install --save-dev @testing-library/react-native @testing-library/jest-native
-```
-
-#### 4. **ESLint Warnungen im Backend**
-- `any`-Typen in einigen Service-Dateien
-- `.d.ts` Dateien sollten vom Linting ausgeschlossen werden
-
-**Empfohlene Lösung:**
-```javascript
-// .eslintrc.js
-module.exports = {
-  ignorePatterns: ['lib/', '**/*.d.ts'],
-  // ...
-};
-```
-
-#### 5. **Fehlende Navigation-Typen**
 ```typescript
-// Aktuell: Typ-Unsafe Navigation
-navigation.navigate('Focus' as never);
+const dailyGoal = 120; // 2 hours in minutes
 ```
+
+**Empfohlene Lösung:** In Settings-Slice oder Konstanten-Datei auslagern.
+
+#### 7. Unvollständige Type-Sicherheit bei Navigation
+**Datei:** `src/screens/HomeScreen.tsx` (mehrere Stellen)
+
+```typescript
+onPress={() => navigation.navigate('Focus' as never)}
+```
+
+**Problem:** `as never` unterdrückt Type-Checking.
 
 **Empfohlene Lösung:**
 ```typescript
 // types/navigation.ts
-export type RootStackParamList = {
-  Main: undefined;
-  Leaderboard: undefined;
-};
-
-export type MainTabParamList = {
-  Home: undefined;
-  Blocker: undefined;
+type RootStackParamList = {
   Focus: undefined;
-  Stats: undefined;
-  Profile: undefined;
+  Blocker: undefined;
+  // ...
 };
 
-// Verwendung mit Typed Navigation
 const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 ```
 
-#### 6. **Unvollständige Firebase Error Handling**
-Einige Firestore-Operationen haben kein try-catch:
+#### 8. Fehlende Dokumentation in Services
+**Problem:** Einige komplexe Service-Methoden haben keine JSDoc-Kommentare.
+
+---
+
+### INFO 🟢
+
+#### 9. ESLint Konfiguration
+**Befund:** ESLint ist konfiguriert, aber keine `eslintignore` oder spezifische Regeln für React Native sichtbar.
+
+#### 10. Prettier Konfiguration
+**Befund:** Prettier ist installiert (v2.8.8), aber keine `.prettierrc` Datei gefunden.
+
+#### 11. Test-Abdeckung
+**Befund:** Nur Backend-Tests vorhanden, keine Frontend-Tests (React Native Testing Library).
+
+#### 12. Git-Status
+**Befund:** Es gibt uncommitted Changes in:
+- `backend/functions/__tests__/functions.test.ts`
+- `backend/functions/__tests__/services.test.ts`
+- `backend/functions/tsconfig.json`
+
+---
+
+## Empfohlene Verbesserungen 📋
+
+### Priorität: Hoch
+1. [ ] Timer Memory Leak fixen
+2. [ ] Redux Selectors optimieren (Reselect oder getrennte useSelector-Hooks)
+3. [ ] Input-Validierung implementieren
+4. [ ] Error Boundaries hinzufügen
+
+### Priorität: Mittel
+5. [ ] TypeScript `any` durch proper Typing ersetzen
+6. [ ] Navigation-Typen definieren
+7. [ ] Hardcoded Werte in Konstanten auslagern
+8. [ ] ESLint/Prettier Konfiguration vervollständigen
+
+### Priorität: Niedrig
+9. [ ] Frontend-Tests hinzufügen (React Native Testing Library)
+10. [ ] JSDoc für alle public Methoden
+11. [ ] Performance-Monitoring einrichten
+12. [ ] CI/CD Pipeline für automatisierte Tests
+
+---
+
+## Sicherheitsüberprüfung 🔒
+
+| Aspekt | Status | Bemerkung |
+|--------|--------|-----------|
+| Keine hartkodierten Secrets | ✅ OK | Keine API-Keys im Code gefunden |
+| Firebase Auth verwendet | ✅ OK | Authentifizierung implementiert |
+| Input-Sanitization | ⚠️ Teilweise | Fehlt an einigen Stellen |
+| HTTPS für API-Calls | ✅ OK | Firebase verwendet HTTPS |
+| Rate Limiting | ⚠️ Nicht geprüft | Sollte auf Firebase-Seite konfiguriert werden |
+
+---
+
+## Performance-Analyse ⚡
+
+| Bereich | Bewertung | Bemerkung |
+|---------|-----------|-----------|
+| Bundle Size | N/A | Nicht analysierbar ohne Build |
+| Re-Renders | ⚠️ Verbesserungswürdig | Siehe Probleme #2 |
+| Memory Leaks | 🔴 Kritisch | Timer nicht korrekt bereinigt |
+| Redux Updates | ✅ Gut | Redux Toolkit verwendet |
+| Firebase Queries | ✅ Gut | Batched writes verwendet |
+
+---
+
+## Code-Beispiele für Verbesserungen
+
+### Optimierte Redux-Selectors mit Reselect
 ```typescript
-// authSlice.ts
-await firestore().collection('users').doc(uid).set(userData, {merge: true});
+// store/selectors/statsSelectors.ts
+import { createSelector } from '@reduxjs/toolkit';
+import { RootState } from '../index';
+
+const selectStats = (state: RootState) => state.stats;
+
+export const selectDailyProgress = createSelector(
+  [selectStats],
+  (stats) => ({
+    totalFocusTime: stats.totalFocusTime,
+    focusCoins: stats.focusCoins,
+    currentStreak: stats.currentStreak,
+  })
+);
 ```
 
-#### 7. **Hardcoded Mock-Daten**
+### Verbesserte Timer-Komponente
 ```typescript
-// AppBlockerScreen.tsx, LeaderboardScreen.tsx
-const MOCK_APPS = [...];
-const MOCK_LEADERBOARD = [...];
-```
-Sollten durch echte Daten ersetzt oder hinter Feature-Flags versteckt werden.
+// Custom Hook für Timer
+const useTimer = (onTick: () => void, isRunning: boolean) => {
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-### 🔵 Info (5)
-
-#### 1. **Redux DevTools nicht konfiguriert**
-```typescript
-// store/index.ts - Erweitern um:
-export const store = configureStore({
-  reducer: persistedReducer,
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
-      },
-    }),
-  devTools: __DEV__, // Redux DevTools aktivieren
-});
-```
-
-#### 2. **Fehlende Loading States**
-Einige Screens zeigen keine Loading-Indikatoren während Daten geladen werden.
-
-#### 3. **Keine Retry-Logik für Netzwerk-Fehler**
-Firebase-Operationen sollten bei Fehlern automatisch retry-en.
-
-#### 4. **Unbenutzte Imports**
-```typescript
-// HomeScreen.tsx
-import {incrementStreak, addFocusCoins} from '../store/slices/statsSlice';
-// Nicht verwendet
-```
-
-#### 5. **Prettier nicht konfiguriert**
-Obwohl als DevDependency vorhanden, fehlt eine `.prettierrc` Konfiguration.
-
----
-
-## 📈 Empfohlene Verbesserungen
-
-### Kurzfristig (High Priority)
-1. ✅ Error Boundary implementieren
-2. ✅ Timer Memory Leak fixen
-3. ✅ ESLint-Konfiguration vervollständigen
-4. ✅ Navigation-Typen hinzufügen
-
-### Mittelfristig (Medium Priority)
-1. 📋 Frontend-Tests hinzufügen (Jest + React Native Testing Library)
-2. 📋 Redux DevTools konfigurieren
-3. 📋 Loading States vervollständigen
-4. 📋 Prettier konfigurieren
-
-### Langfristig (Low Priority)
-1. 🔮 E2E-Tests mit Detox
-2. 🔮 Storybook für Komponenten-Dokumentation
-3. 🔮 Performance-Monitoring einrichten
-4. 🔮 Code-Splitting für bessere Startup-Performance
-
----
-
-## 🔒 Sicherheitsprüfung
-
-| Prüfung | Status | Bemerkung |
-|---------|--------|-----------|
-| Hartkodierte Secrets | ✅ OK | Keine gefunden |
-| Firebase Config | ✅ OK | Keine API-Keys im Code |
-| Input-Validierung | ✅ OK | Backend validiert alle Inputs |
-| Auth-Checks | ✅ OK | Alle HTTP-Functions prüfen Auth |
-| SQL-Injection | N/A | Firestore (NoSQL) |
-| XSS-Prevention | ✅ OK | React Native escaped automatisch |
-
----
-
-## 🧪 Test-Ergebnisse
-
-### Backend Tests
-```
-PASS __tests__/services.test.ts
-PASS __tests__/functions.test.ts
-
-Test Suites: 2 passed, 2 total
-Tests:       13 passed, 13 total
-```
-
-### TypeScript Check
-```
-> tsc --noEmit
-✅ Keine Typfehler gefunden
-```
-
-### ESLint
-```
-⚠️  18 Warnungen (hauptsächlich `any`-Typen)
-❌  0 Fehler (im Source-Code)
+  useEffect(() => {
+    if (isRunning) {
+      intervalRef.current = setInterval(onTick, 1000);
+    }
+    
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isRunning, onTick]);
+};
 ```
 
 ---
 
-## 📚 Dokumentation
+## Fazit
 
-### Vorhanden
-- ✅ Haupt-README.md mit Setup-Anleitung
-- ✅ Backend-README mit Funktionsbeschreibung
-- ✅ Inline-Kommentare in komplexen Funktionen
+Die FocusFlow App ist ein gut strukturiertes Projekt mit moderner Architektur. Die kritischen Punkte (Timer Memory Leak, unnötige Re-Renders) sollten priorisiert werden, um die Stabilität und Performance zu verbessern. Die Code-Qualität ist insgesamt solide und die Entwickler haben gute Patterns verwendet.
 
-### Empfohlen
-- 📋 API-Dokumentation (Swagger/OpenAPI)
-- 📋 Komponenten-Dokumentation (Storybook)
-- 📋 Architektur-Dokumentation (ADR)
+### Empfohlene nächste Schritte:
+1. Sofort: Timer-Memory-Leak beheben
+2. Kurzfristig: Redux-Selectors optimieren
+3. Mittelfristig: Frontend-Tests hinzufügen
+4. Langfristig: Performance-Monitoring implementieren
 
 ---
 
-## 🎯 Fazit
-
-Der FocusFlow-Code zeigt eine **solide Architektur** mit guter TypeScript-Typisierung und sauberer Projektstruktur. Die Firebase-Integration ist professionell umgesetzt, und das Backend bietet eine gute Grundlage für Skalierung.
-
-**Stärken:**
-- Exzellente TypeScript-Typisierung
-- Saubere Redux-Architektur
-- Umfassendes Theme-System
-- Professionelles Backend
-
-**Verbesserungspotenzial:**
-- Frontend-Tests fehlen komplett
-- Einige potenzielle Memory Leaks
-- Error Boundaries nicht implementiert
-
-**Gesamteindruck:** Ein gut wartbarer, moderner React Native Codebase, der bereit für Produktion ist, nachdem die kritischen Punkte behoben wurden.
-
----
-
-*Dieser Report wurde automatisch generiert vom FocusFlow Code-Reviewer Agent.*
+*Dieser Report wurde automatisch generiert durch den FocusFlow Code-Reviewer Agent.*
