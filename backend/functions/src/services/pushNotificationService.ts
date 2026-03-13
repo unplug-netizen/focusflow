@@ -518,7 +518,7 @@ export class PushNotificationService {
   /**
    * Get next time outside quiet hours
    */
-  private getNextNonQuietHour(userId: string): Date {
+  private getNextNonQuietHour(_userId: string): Date {
     // Simplified - in production, fetch user's quiet hours
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);

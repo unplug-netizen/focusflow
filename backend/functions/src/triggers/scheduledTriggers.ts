@@ -19,7 +19,7 @@ const badgeSystem = createBadgeVerificationSystem(pushNotificationService);
 export const dailySummaryNotification = functions.pubsub
   .schedule('0 21 * * *')
   .timeZone('Europe/Berlin')
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log('Running daily summary notification job');
 
     try {
@@ -65,7 +65,7 @@ export const dailySummaryNotification = functions.pubsub
 export const streakReminderCheck = functions.pubsub
   .schedule('0 20 * * *')
   .timeZone('Europe/Berlin')
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log('Running streak reminder check');
 
     try {
@@ -110,7 +110,7 @@ export const streakReminderCheck = functions.pubsub
 export const dailyLeaderboardUpdate = functions.pubsub
   .schedule('0 0 * * *')
   .timeZone('Europe/Berlin')
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log('Running daily leaderboard update');
 
     try {
@@ -129,7 +129,7 @@ export const dailyLeaderboardUpdate = functions.pubsub
 export const weeklyChallengeReset = functions.pubsub
   .schedule('0 0 * * 1')
   .timeZone('Europe/Berlin')
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log('Running weekly challenge reset');
 
     try {
@@ -162,7 +162,7 @@ export const weeklyChallengeReset = functions.pubsub
 export const cleanupOldLogs = functions.pubsub
   .schedule('0 2 * * *')
   .timeZone('Europe/Berlin')
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log('Running cleanup of old usage logs');
 
     try {
@@ -190,7 +190,7 @@ export const cleanupOldLogs = functions.pubsub
 export const processQueuedNotifications = functions.pubsub
   .schedule('0 * * * *')
   .timeZone('Europe/Berlin')
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log('Processing queued notifications');
 
     try {
@@ -228,7 +228,7 @@ export const processQueuedNotifications = functions.pubsub
 export const dailyBadgeCheck = functions.pubsub
   .schedule('0 6 * * *')
   .timeZone('Europe/Berlin')
-  .onRun(async (context) => {
+  .onRun(async (_context) => {
     console.log('Running daily badge check');
 
     try {
