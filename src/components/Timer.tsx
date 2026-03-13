@@ -1,5 +1,5 @@
-import React, {useEffect, useState, useMemo} from 'react';
-import {View, Text, StyleSheet, ViewStyle, Animated} from 'react-native';
+import React, {useEffect, useState, useRef} from 'react';
+import {View, Text, StyleSheet, ViewStyle} from 'react-native';
 import {useTheme} from '../theme/ThemeContext';
 
 interface TimerProps {
@@ -21,29 +21,13 @@ export const Timer: React.FC<TimerProps> = ({
   style,
   label,
   color,
-  animated = true,
 }) => {
   const {theme} = useTheme();
   const [displayTime, setDisplayTime] = useState(timeRemaining);
-  const progressAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     setDisplayTime(timeRemaining);
   }, [timeRemaining]);
-
-  useEffect(() => {
-    const progress = totalTime > 0 ? timeRemaining / totalTime : 0;
-    if (animated) {
-      Animated.spring(progressAnim, {
-        toValue: progress,
-        useNativeDriver: true,
-        friction: 8,
-        tension: 40,
-      }).start();
-    } else {
-      progressAnim.setValue(progress);
-    }
-  }, [timeRemaining, totalTime, animated]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -96,52 +80,47 @@ export const Timer: React.FC<TimerProps> = ({
   const strokeWidth = getStrokeWidth();
   const radius = (containerSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-
-  // Animated stroke offset
-  const [animatedOffset, setAnimatedOffset] = useState(circumference * (1 - progress));
-  
-  useEffect(() => {
-    const listener = progressAnim.addListener(({value}) => {
-      setAnimatedOffset(circumference * (1 - value));
-    });
-    return () => progressAnim.removeListener(listener);
-  }, [circumference]);
+  const strokeDashoffset = circumference * (1 - progress);
 
   return (
     <View style={[styles.container, style]}>
       {showProgress ? (
         <View style={[styles.progressContainer, {width: containerSize, height: containerSize}]}>
-          {/* Background Circle */}
-          <View
-            style={[
-              styles.circleTrack,
-              {
-                width: containerSize,
-                height: containerSize,
-                borderRadius: containerSize / 2,
-                borderWidth: strokeWidth,
-                borderColor: theme.colors.border,
-              },
-            ]}
-          />
-          {/* Progress Circle using border trick */}
-          <View
-            style={[
-              styles.circleProgress,
-              {
-                width: containerSize,
-                height: containerSize,
-                borderRadius: containerSize / 2,
-                borderWidth: strokeWidth,
-                borderColor: timerColor,
-                borderTopColor: 'transparent',
-                borderRightColor: progress < 0.75 ? 'transparent' : timerColor,
-                transform: [
-                  {rotate: `${-90 + (1 - progress) * 360}deg`},
-                ],
-              },
-            ]}
-          />
+          {/* SVG-like Circle Progress using View borders */}
+          <View style={[styles.circleContainer, {width: containerSize, height: containerSize}]}>
+            {/* Background Circle */}
+            <View
+              style={[
+                styles.circleTrack,
+                {
+                  width: containerSize,
+                  height: containerSize,
+                  borderRadius: containerSize / 2,
+                  borderWidth: strokeWidth,
+                  borderColor: theme.colors.border,
+                },
+              ]}
+            />
+            {/* Progress Arc - Using a rotated view approach */}
+            <View
+              style={[
+                styles.progressArc,
+                {
+                  width: containerSize,
+                  height: containerSize,
+                  borderRadius: containerSize / 2,
+                  borderWidth: strokeWidth,
+                  borderColor: timerColor,
+                  borderTopColor: progress > 0.75 ? timerColor : 'transparent',
+                  borderRightColor: progress > 0.5 ? timerColor : 'transparent',
+                  borderBottomColor: progress > 0.25 ? timerColor : 'transparent',
+                  transform: [
+                    {rotate: `${-90 + (1 - progress) * 360}deg`},
+                  ],
+                },
+              ]}
+            />
+          </View>
           {/* Time Display */}
           <View style={styles.timeContainer}>
             <Text
@@ -186,10 +165,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  circleContainer: {
+    position: 'absolute',
+  },
   circleTrack: {
     position: 'absolute',
   },
-  circleProgress: {
+  progressArc: {
     position: 'absolute',
   },
   timeContainer: {
