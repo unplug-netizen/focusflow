@@ -399,6 +399,7 @@ describe('Scheduled Functions - Logic Tests', () => {
       let awardedCount = 0;
 
       for (const _user of mockUsers) {
+        void _user; // Suppress unused variable warning
         // Simulate badge checking
         const newBadges = ['badge1']; // Mock new badge
         awardedCount += newBadges.length;
