@@ -386,7 +386,14 @@ export class ChallengeService {
       .limit(limit)
       .get();
 
-    const results = [];
+    const results: {
+      userId: string;
+      displayName: string;
+      progress: number;
+      completed: boolean;
+      completedAt?: Date;
+      rank: number;
+    }[] = [];
     for (let i = 0; i < snapshot.docs.length; i++) {
       const doc = snapshot.docs[i];
       const data = doc.data();

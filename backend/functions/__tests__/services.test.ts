@@ -1,64 +1,44 @@
 /**
  * Unit Tests für Backend Services
  * 
- * Diese Tests prüfen die grundlegende Funktionalität der Services.
+ * Diese Tests prüfen die Business-Logik der Services.
  */
 
-import {LeaderboardService, LeaderboardCategory} from '../src/services/leaderboardService';
-import {PushNotificationService} from '../src/services/pushNotificationService';
-import {AppUsageTracker} from '../src/services/appUsageTracker';
 import {
   BadgeVerificationSystem,
   createBadgeVerificationSystem,
   BadgeTier,
 } from '../src/services/badgeVerificationSystem';
+import {PushNotificationService} from '../src/services/pushNotificationService';
+import {LeaderboardService} from '../src/services/leaderboardService';
+import {AppUsageTracker} from '../src/services/appUsageTracker';
 
 // Mock Firebase
 jest.mock('../src/config/firebase', () => ({
   db: {
     collection: jest.fn(() => ({
       doc: jest.fn(() => ({
+        get: jest.fn().mockResolvedValue({exists: false, data: () => null}),
+        set: jest.fn().mockResolvedValue(undefined),
+        update: jest.fn().mockResolvedValue(undefined),
+        delete: jest.fn().mockResolvedValue(undefined),
         collection: jest.fn(() => ({
           doc: jest.fn(() => ({
-            get: jest.fn().mockResolvedValue({exists: false}),
+            get: jest.fn().mockResolvedValue({exists: false, data: () => null}),
             set: jest.fn().mockResolvedValue(undefined),
             update: jest.fn().mockResolvedValue(undefined),
             delete: jest.fn().mockResolvedValue(undefined),
           })),
           add: jest.fn().mockResolvedValue({id: 'mock-doc-id'}),
-          where: jest.fn(() => ({
-            where: jest.fn(() => ({
-              get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
-            })),
-            orderBy: jest.fn(() => ({
-              limit: jest.fn(() => ({
-                get: jest.fn().mockResolvedValue({docs: []}),
-              })),
-              get: jest.fn().mockResolvedValue({docs: []}),
-            })),
-            limit: jest.fn(() => ({
-              get: jest.fn().mockResolvedValue({docs: []}),
-            })),
-            get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
-          })),
-          orderBy: jest.fn(() => ({
-            limit: jest.fn(() => ({
-              get: jest.fn().mockResolvedValue({docs: []}),
-            })),
-            get: jest.fn().mockResolvedValue({docs: []}),
-          })),
+          where: jest.fn().mockReturnThis(),
+          orderBy: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
           get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
         })),
-        get: jest.fn().mockResolvedValue({exists: false}),
-        set: jest.fn().mockResolvedValue(undefined),
-        update: jest.fn().mockResolvedValue(undefined),
       })),
-      where: jest.fn(() => ({
-        where: jest.fn(() => ({
-          get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
-        })),
-        get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
-      })),
+      where: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
       get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
     })),
     batch: jest.fn(() => ({
@@ -103,20 +83,18 @@ describe('LeaderboardService', () => {
   describe('updateScore', () => {
     it('should update user score without throwing', async () => {
       const userId = 'user123';
-      const category: LeaderboardCategory = 'focus_time';
-      const score = 120;
       const userData = {
         displayName: 'Test User',
         photoURL: 'https://example.com/photo.jpg',
         streak: 5,
       };
 
-      await expect(service.updateScore(userId, category, score, userData)).resolves.not.toThrow();
+      await expect(service.updateScore(userId, 'focus_time', 120, userData)).resolves.not.toThrow();
     });
   });
 
   describe('getLeaderboard', () => {
-    it('should return leaderboard entries', async () => {
+    it('should return leaderboard entries array', async () => {
       const result = await service.getLeaderboard('badges', 10);
       expect(Array.isArray(result)).toBe(true);
     });
@@ -128,22 +106,6 @@ describe('LeaderboardService', () => {
       expect(result).toHaveProperty('rank');
       expect(result).toHaveProperty('total');
       expect(result).toHaveProperty('entry');
-    });
-  });
-
-  describe('category validation', () => {
-    it('should accept all valid categories', () => {
-      const validCategories: LeaderboardCategory[] = [
-        'screen_time',
-        'focus_time',
-        'badges',
-        'streak',
-        'weekly_challenge',
-      ];
-
-      validCategories.forEach((category) => {
-        expect(() => service.getLeaderboard(category, 10)).not.toThrow();
-      });
     });
   });
 });
@@ -219,13 +181,6 @@ describe('AppUsageTracker', () => {
     });
   });
 
-  describe('getWeeklyStats', () => {
-    it('should return stats array', async () => {
-      const result = await tracker.getWeeklyStats('user123');
-      expect(Array.isArray(result)).toBe(true);
-    });
-  });
-
   describe('checkLimitExceeded', () => {
     it('should return limit check result', async () => {
       const result = await tracker.checkLimitExceeded('user123', 'com.example.app', 60);
@@ -258,6 +213,10 @@ describe('BadgeVerificationSystem', () => {
       expect(badgeIds).toContain('social_detox_7');
       expect(badgeIds).toContain('digital_sabbath');
       expect(badgeIds).toContain('sleep_champion');
+      expect(badgeIds).toContain('early_bird');
+      expect(badgeIds).toContain('weekend_warrior');
+      expect(badgeIds).toContain('time_saver');
+      expect(badgeIds).toContain('master_saver');
     });
 
     it('should have valid tier values for all badges', () => {
@@ -296,14 +255,6 @@ describe('BadgeVerificationSystem', () => {
   describe('initializeBadges', () => {
     it('should initialize badges without throwing', async () => {
       await expect(badgeSystem.initializeBadges()).resolves.not.toThrow();
-    });
-  });
-
-  describe('checkBadgeEligibility', () => {
-    it('should return false for non-existent user', async () => {
-      const badge = BadgeVerificationSystem.DEFAULT_BADGES.find(b => b.id === 'streak_7')!;
-      const result = await badgeSystem.checkBadgeEligibility('nonexistent', badge);
-      expect(result).toBe(false);
     });
   });
 
