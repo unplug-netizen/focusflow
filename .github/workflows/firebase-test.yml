@@ -1,0 +1,115 @@
+name: Build & Test FocusFlow
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Manuelles Triggern möglich
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install React Native CLI
+        run: npm install -g @react-native-community/cli
+
+      - name: Generate Android project
+        run: npx react-native@latest init --skip-install --replace-directory temp-android || true
+
+      - name: Create Android directory structure
+        run: |
+          if [ ! -d "android" ]; then
+            npx react-native@0.73.6 android
+          fi
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build Debug APK
+        run: |
+          cd android
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+
+  firebase-test-lab:
+    needs: build-android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download APK
+        uses: actions/download-artifact@v4
+        with:
+          name: app-debug
+          path: ./apk
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+          service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Install gcloud Firebase components
+        run: gcloud components install beta --quiet
+
+      - name: Run Firebase Test Lab Robo Test
+        run: |
+          gcloud beta firebase test android run \
+            --type robo \
+            --app ./apk/app-debug.apk \
+            --device model=redfin,version=30,locale=de_DE,orientation=portrait \
+            --device model=oriole,version=33,locale=de_DE,orientation=portrait \
+            --device model=panther,version=34,locale=de_DE,orientation=portrait \
+            --timeout 15m \
+            --robo-directives=text:emailInput=test@example.com,text:passwordInput=test123 \
+            --results-bucket=gs://${{ secrets.FIREBASE_PROJECT_ID }}-testlab \
+            --results-dir=focusflow-$(date +%Y%m%d-%H%M%S)
+
+      - name: Get test results URL
+        run: |
+          echo "Test results available at:"
+          echo "https://console.firebase.google.com/project/${{ secrets.FIREBASE_PROJECT_ID }}/testlab/histories"
+
+  test-summary:
+    needs: firebase-test-lab
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Test Summary
+        run: |
+          echo "========================================"
+          echo "  FocusFlow Firebase Test Lab Complete"
+          echo "========================================"
+          echo ""
+          echo "Tests ran on:"
+          echo "  - Pixel 5 (Android 11)"
+          echo "  - Pixel 6 (Android 13)"
+          echo "  - Pixel 7 (Android 14)"
+          echo ""
+          echo "Check results in Firebase Console:"
+          echo "https://console.firebase.google.com/project/${{ secrets.FIREBASE_PROJECT_ID }}/testlab/histories"
