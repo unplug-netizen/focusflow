@@ -296,15 +296,22 @@ export class BadgeVerificationSystem {
       .collection(this.USER_BADGES_COLLECTION)
       .doc(badge.id);
 
+    const req = badge.requirement;
+    const progressValue = req.type === 'streak' ? req.days : 
+                         req.type === 'focus_time' ? req.minutes :
+                         req.type === 'blocked_time' ? req.minutes :
+                         req.type === 'social_detox' ? req.days :
+                         req.type === 'digital_sabbath' ? req.hours :
+                         req.type === 'bedtime' ? req.days :
+                         req.type === 'early_bird' ? req.days :
+                         req.type === 'weekend_warrior' ? req.consecutiveWeekends : 1;
+    const maxProgressValue = progressValue;
+
     batch.set(userBadgeRef, {
       badgeId: badge.id,
       unlockedAt: Timestamp.now(),
-      progress: badge.requirement.type === 'streak' 
-        ? badge.requirement.days 
-        : (badge.requirement as any).minutes || 1,
-      maxProgress: badge.requirement.type === 'streak'
-        ? badge.requirement.days
-        : (badge.requirement as any).minutes || 1,
+      progress: progressValue,
+      maxProgress: maxProgressValue,
     });
 
     // Add Focus Coins reward

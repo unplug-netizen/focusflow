@@ -283,7 +283,7 @@ export class LeaderboardService {
       platinum: 100,
     };
 
-    return badges.reduce((total: number, badge: any) => {
+    return badges.reduce((total: number, badge: {unlockedAt?: Date; tier: string}) => {
       if (badge.unlockedAt) {
         return total + (tierPoints[badge.tier] || 0);
       }
