@@ -1,110 +1,102 @@
-# FocusFlow - Screentime Reducer App
+# FocusFlow Mobile App
 
-## Overview
-FocusFlow is a professional mobile application designed to help users reduce screen time through gamification, social features, and smart locking mechanisms.
+Eine React Native App zur Unterstützung von digitalem Wohlbefinden durch App-Blocking, Fokus-Timer und Statistik-Tracking.
 
 ## Features
 
-### Core Features
-- **App Blocker**: Block individual apps or categories with scheduled locking
-- **Full Lock Mode**: Complete device lock with emergency override
-- **Focus Mode**: Pomodoro timer with ambient sounds and distraction blocking
-- **Reward System**: Badges, streaks, and Focus Coins
-- **Global Leaderboard**: Compete with users worldwide
-- **Statistics**: Detailed analytics and insights
-- **Social Features**: Friends, challenges, and accountability partners
+- 🚫 **App Blocker**: Blockiere ablenkende Apps mit Zeitlimits oder Zeitplänen
+- 🎯 **Fokus-Modus**: Pomodoro-Timer mit Kurz- und Langpausen
+- 📊 **Statistiken**: Verfolge deine Bildschirmzeit und Fokus-Sitzungen
+- 🏆 **Leaderboard**: Vergleiche dich mit Freunden
+- 👤 **Profil**: Verwalte Einstellungen und sammle Badges
 
-### Technical Stack
-- **Framework**: React Native 0.73.6 with TypeScript
-- **State Management**: Redux Toolkit + RTK Query
-- **Navigation**: React Navigation v6
-- **Backend**: Firebase (Auth, Firestore, Cloud Functions)
-- **Storage**: AsyncStorage + Redux Persist
-- **Testing**: Jest + React Native Testing Library + Detox
-- **CI/CD**: GitHub Actions + Fastlane
+## Tech Stack
 
-## Project Structure
+- React Native 0.73.6
+- TypeScript
+- Redux Toolkit + Redux Persist
+- React Navigation
+- Firebase (Auth, Firestore)
+
+## Installation
+
+```bash
+npm install
+cd ios && pod install && cd ..  # Für iOS
+```
+
+## Starten
+
+```bash
+npm run android  # Android
+npm run ios      # iOS
+```
+
+## Type-Check
+
+```bash
+npm run type-check
+```
+
+## Projektstruktur
 
 ```
 src/
-├── components/          # Reusable UI components
-├── screens/            # Screen components
-├── navigation/         # Navigation configuration
-├── store/              # Redux store and slices
-├── services/           # API services and Firebase
-├── hooks/              # Custom React hooks
-├── utils/              # Utility functions
-├── types/              # TypeScript type definitions
-├── constants/          # App constants
-├── theme/              # Theme configuration
-└── assets/             # Images, fonts, sounds
+├── components/       # Wiederverwendbare UI-Komponenten
+│   ├── Button.tsx
+│   ├── Card.tsx
+│   ├── Input.tsx
+│   ├── Timer.tsx
+│   ├── ProgressBar.tsx
+│   ├── StatCard.tsx
+│   ├── BadgeCard.tsx
+│   ├── AppUsageCard.tsx
+│   └── LeaderboardItem.tsx
+├── screens/          # Screen-Komponenten
+│   ├── HomeScreen.tsx
+│   ├── AppBlockerScreen.tsx
+│   ├── FocusModeScreen.tsx
+│   ├── StatsScreen.tsx
+│   ├── LeaderboardScreen.tsx
+│   ├── ProfileScreen.tsx
+│   └── LoginScreen.tsx
+├── store/            # Redux Store
+│   ├── index.ts
+│   └── slices/
+│       ├── authSlice.ts
+│       ├── appBlockerSlice.ts
+│       ├── focusModeSlice.ts
+│       ├── statsSlice.ts
+│       ├── leaderboardSlice.ts
+│       └── settingsSlice.ts
+├── theme/            # Theme-Konfiguration
+│   └── ThemeContext.tsx
+└── types/            # TypeScript Typen
+    └── index.ts
 ```
 
-## Development Phases
+## Navigation
 
-### Phase 1: Setup & Foundation
-- [x] Project initialization
-- [x] Folder structure
-- [x] Dependencies installation
-- [x] Navigation setup
-- [x] Theme configuration
+Die App verwendet eine Bottom-Tab-Navigation mit folgenden Tabs:
+- Home (🏠)
+- Blocker (🚫)
+- Fokus (🎯)
+- Stats (📊)
+- Profil (👤)
 
-### Phase 2: Core Features
-- [ ] App Blocker implementation
-- [ ] Focus Mode with Pomodoro
-- [ ] Statistics screen
-- [ ] Local notifications
+Der Leaderboard-Screen ist als Modal über den Stack Navigator erreichbar.
 
-### Phase 3: Backend & Social
-- [ ] Firebase integration
-- [ ] Authentication
-- [ ] Leaderboard
-- [ ] Badge system
-- [ ] Social features
+## State Management
 
-### Phase 4: Polish & Testing
-- [ ] Unit tests
-- [ ] E2E tests
-- [ ] Performance optimization
-- [ ] CI/CD pipeline
+Redux Toolkit mit Persistenz für:
+- Auth-Status
+- App-Blocker Regeln
+- Statistiken
+- Einstellungen
 
-## Getting Started
+## Theme
 
-### Prerequisites
-- Node.js >= 18
-- React Native CLI
-- Android Studio / Xcode
-- Firebase project
-
-### Installation
-```bash
-# Clone repository
-git clone https://github.com/unplug-netizen/focusflow.git
-cd focusflow
-
-# Install dependencies
-npm install
-
-# iOS setup
-cd ios && pod install && cd ..
-
-# Start Metro
-npm start
-
-# Run on Android
-npm run android
-
-# Run on iOS
-npm run ios
-```
-
-### Environment Setup
-Create `.env` file:
-```
-FIREBASE_API_KEY=your_api_key
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_APP_ID=your_app_id
-```
-
-## License
-MIT
+Unterstützt Light/Dark Mode über ThemeContext mit:
+- Primärfarbe: #00d4aa (Türkis)
+- Konsistente Farbpalette für beide Modi
+- Dynamische Theme-Wechsel
