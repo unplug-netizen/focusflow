@@ -5,3 +5,4 @@ export {StatsScreen} from './StatsScreen';
 export {LeaderboardScreen} from './LeaderboardScreen';
 export {ProfileScreen} from './ProfileScreen';
 export {LoginScreen} from './LoginScreen';
+export {LoadingScreen} from './LoadingScreen';

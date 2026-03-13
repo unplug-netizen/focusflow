@@ -17,6 +17,7 @@ import StatsScreen from './src/screens/StatsScreen';
 import LeaderboardScreen from './src/screens/LeaderboardScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import LoadingScreen from './src/screens/LoadingScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -137,6 +138,11 @@ function AppContent(): React.JSX.Element {
       dispatch(signInAnonymously());
     }
   }, [dispatch, isAuthenticated, isLoading]);
+
+  // Show loading screen while auth state is being determined
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <NavigationContainer>
