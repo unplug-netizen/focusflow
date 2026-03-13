@@ -6,82 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Dimensions,
 } from 'react-native';
 import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '../theme/ThemeContext';
 import {RootState} from '../store';
-import {Card, StatCard, BadgeCard, ProgressBar} from '../components';
+import {Card, StatCard, BadgeCard, ProgressBar, BarChart} from '../components';
 import {Badge} from '../types';
-
-const {width} = Dimensions.get('window');
-
-const DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-
-// Simple bar chart component
-const BarChart: React.FC<{data: number[]; maxValue: number; color: string}> = ({
-  data,
-  maxValue,
-  color,
-}) => {
-  const {theme} = useTheme();
-
-  return (
-    <View style={chartStyles.container}>
-      {data.map((value, index) => {
-        const height = maxValue > 0 ? (value / maxValue) * 100 : 0;
-        return (
-          <View key={index} style={chartStyles.barContainer}>
-            <View style={chartStyles.barWrapper}>
-              <View
-                style={[
-                  chartStyles.bar,
-                  {
-                    height: `${Math.max(height, 5)}%`,
-                    backgroundColor: color,
-                    opacity: index === data.length - 1 ? 1 : 0.7,
-                  },
-                ]}
-              />
-            </View>
-            <Text style={[chartStyles.label, {color: theme.colors.textSecondary}]}>
-              {DAYS[index]}
-            </Text>
-          </View>
-        );
-      })}
-    </View>
-  );
-};
-
-const chartStyles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: 150,
-    paddingTop: 20,
-  },
-  barContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  barWrapper: {
-    height: 120,
-    width: '60%',
-    justifyContent: 'flex-end',
-  },
-  bar: {
-    width: '100%',
-    borderRadius: 4,
-    minHeight: 4,
-  },
-  label: {
-    fontSize: 12,
-    marginTop: 8,
-  },
-});
 
 export const StatsScreen: React.FC = () => {
   const {theme} = useTheme();
@@ -165,6 +96,8 @@ export const StatsScreen: React.FC = () => {
               data={stats.weeklyScreenTime}
               maxValue={maxScreenTime}
               color={theme.colors.primary}
+              secondaryColor={theme.colors.secondary}
+              showValues={false}
             />
             <View style={styles.chartLegend}>
               <View style={styles.legendItem}>

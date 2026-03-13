@@ -60,7 +60,7 @@ export const FocusModeScreen: React.FC = () => {
     if (timer.status === 'completed') {
       handleTimerComplete();
     }
-  }, [timer.status]);
+  }, [timer.status, timer.timeRemaining]);
 
   // Pulse animation for running timer
   useEffect(() => {

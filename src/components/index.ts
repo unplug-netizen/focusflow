@@ -7,3 +7,8 @@ export {BadgeCard} from './BadgeCard';
 export {StatCard} from './StatCard';
 export {AppUsageCard} from './AppUsageCard';
 export {LeaderboardItem} from './LeaderboardItem';
+export {BarChart, LineChart, PieChart} from './Charts';
+export {EmptyState} from './EmptyState';
+export {FloatingActionButton} from './FloatingActionButton';
+export {Notification} from './Notification';
+export {Header} from './Header';

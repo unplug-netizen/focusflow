@@ -1,15 +1,17 @@
-import React from 'react';
-import {View, Text, StyleSheet, ViewStyle} from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import {View, Text, StyleSheet, ViewStyle, Animated} from 'react-native';
 import {useTheme} from '../theme/ThemeContext';
 
 interface ProgressBarProps {
-  progress: number; // 0-100
+  progress: number; // 0-100 or 0-total
   total?: number;
   showPercentage?: boolean;
   size?: 'small' | 'medium' | 'large';
   color?: string;
   style?: ViewStyle;
   label?: string;
+  animated?: boolean;
+  showSteps?: boolean;
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = ({
@@ -20,9 +22,34 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
   color,
   style,
   label,
+  animated = true,
+  showSteps = false,
 }) => {
   const {theme} = useTheme();
   const percentage = Math.min(Math.max((progress / total) * 100, 0), 100);
+  const animValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (animated) {
+      Animated.spring(animValue, {
+        toValue: percentage,
+        useNativeDriver: false,
+        friction: 8,
+        tension: 40,
+      }).start();
+    } else {
+      animValue.setValue(percentage);
+    }
+  }, [percentage, animated]);
+
+  const [animatedWidth, setAnimatedWidth] = React.useState<number>(percentage);
+
+  useEffect(() => {
+    const listener = animValue.addListener(({value}) => {
+      setAnimatedWidth(value);
+    });
+    return () => animValue.removeListener(listener);
+  }, []);
 
   const getHeight = () => {
     switch (size) {
@@ -39,14 +66,18 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      {(label || showPercentage) && (
+      {(label || showPercentage || showSteps) && (
         <View style={styles.header}>
           {label && (
             <Text style={[styles.label, {color: theme.colors.text}]}>
               {label}
             </Text>
           )}
-          {showPercentage && (
+          {showSteps ? (
+            <Text style={[styles.percentage, {color: theme.colors.textSecondary}]}>
+              {Math.round(progress)}/{total}
+            </Text>
+          ) : showPercentage && (
             <Text style={[styles.percentage, {color: theme.colors.textSecondary}]}>
               {Math.round(percentage)}%
             </Text>
@@ -62,11 +93,11 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
             borderRadius: getHeight() / 2,
           },
         ]}>
-        <View
+        <Animated.View
           style={[
             styles.fill,
             {
-              width: `${percentage}%`,
+              width: `${animatedWidth}%`,
               backgroundColor: barColor,
               borderRadius: getHeight() / 2,
             },

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from '../theme/ThemeContext';
 import {RootState} from '../store';
-import {Card, StatCard, Button, ProgressBar} from '../components';
+import {Card, StatCard, Button, ProgressBar, FloatingActionButton} from '../components';
 import {incrementStreak, addFocusCoins} from '../store/slices/statsSlice';
 
 export const HomeScreen: React.FC = () => {
@@ -26,6 +26,10 @@ export const HomeScreen: React.FC = () => {
   const activeRules = rules.filter(r => r.isActive).length;
   const dailyGoal = 120; // 2 hours in minutes
   const dailyProgress = Math.min((totalFocusTime / dailyGoal) * 100, 100);
+
+  const handleQuickFocus = useCallback(() => {
+    navigation.navigate('Focus' as never);
+  }, [navigation]);
 
   return (
     <SafeAreaView
@@ -248,7 +252,20 @@ export const HomeScreen: React.FC = () => {
               ))}
           </ScrollView>
         </View>
+
+        {/* Bottom padding for FAB */}
+        <View style={styles.bottomPadding} />
       </ScrollView>
+
+      {/* Floating Action Button */}
+      <View style={styles.fabContainer}>
+        <FloatingActionButton
+          icon="🎯"
+          onPress={handleQuickFocus}
+          size="large"
+          animated
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -407,6 +424,14 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '500',
     textAlign: 'center',
+  },
+  bottomPadding: {
+    height: 80,
+  },
+  fabContainer: {
+    position: 'absolute',
+    right: 24,
+    bottom: 100,
   },
 });
 
