@@ -13,7 +13,7 @@ interface BarChartProps {
   barWidth?: number;
 }
 
-const { width: screenWidth } = Dimensions.get("window");
+// Chart component dimensions can be configured via props
 
 export const BarChart: React.FC<BarChartProps> = ({
   data,
@@ -112,12 +112,8 @@ export const LineChart: React.FC<LineChartProps> = ({
     return { x, y, value };
   });
 
-  const pathD = points
-    .map((point, index) => {
-      const command = index === 0 ? "M" : "L";
-      return `${command} ${point.x} ${point.y}`;
-    })
-    .join(" ");
+  // Path data for SVG line chart (reserved for future SVG implementation)
+  // const pathD = points...   // eslint-disable-line @typescript-eslint/no-unused-vars
 
   return (
     <View style={[styles.lineChartContainer, style]}>

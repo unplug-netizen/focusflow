@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ViewStyle } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 
@@ -80,9 +80,6 @@ export const Timer: React.FC<TimerProps> = ({
   const timerColor = color || theme.colors.primary;
   const containerSize = getContainerSize();
   const strokeWidth = getStrokeWidth();
-  const radius = (containerSize - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference * (1 - progress);
 
   return (
     <View style={[styles.container, style]}>

@@ -9,7 +9,6 @@ import {
   Vibration,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../theme/ThemeContext";
 import { RootState, AppDispatch } from "../store";
 import { Card, Button, Timer } from "../components";
@@ -24,10 +23,9 @@ import {
 } from "../store/slices/focusModeSlice";
 import {
   addFocusTime,
-  incrementStreak,
   addFocusCoins,
 } from "../store/slices/statsSlice";
-import { TimerState, FocusSession } from "../types";
+import { FocusSession } from "../types";
 import {
   POMODORO_DURATION,
   SHORT_BREAK_DURATION,
@@ -36,7 +34,7 @@ import {
 } from "../constants";
 
 const TIMER_MODES: {
-  key: TimerState["mode"];
+  key: "pomodoro" | "shortBreak" | "longBreak";
   label: string;
   duration: number;
   icon: string;
@@ -63,7 +61,6 @@ const TIMER_MODES: {
 
 export const FocusModeScreen: React.FC = () => {
   const { theme } = useTheme();
-  const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
   const { timer, soundEnabled } = useSelector(
     (state: RootState) => state.focusMode
@@ -92,6 +89,7 @@ export const FocusModeScreen: React.FC = () => {
     if (timer.status === "completed") {
       handleTimerComplete();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer.status, timer.timeRemaining]);
 
   // Pulse animation for running timer
@@ -114,6 +112,7 @@ export const FocusModeScreen: React.FC = () => {
     } else {
       pulseAnim.setValue(1);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timer.status]);
 
   const handleTimerComplete = () => {
@@ -151,20 +150,8 @@ export const FocusModeScreen: React.FC = () => {
     dispatch(stopTimer());
   };
 
-  const handleModeChange = (mode: TimerState["mode"]) => {
+  const handleModeChange = (mode: "pomodoro" | "shortBreak" | "longBreak") => {
     dispatch(setTimerMode(mode));
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  };
-
-  const getProgress = () => {
-    return timer.totalTime > 0 ? timer.timeRemaining / timer.totalTime : 0;
   };
 
   return (

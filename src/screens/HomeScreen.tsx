@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   View,
   Text,
@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../theme/ThemeContext";
 import { RootState } from "../store";
@@ -18,13 +18,11 @@ import {
   ProgressBar,
   FloatingActionButton,
 } from "../components";
-import { incrementStreak, addFocusCoins } from "../store/slices/statsSlice";
 import { DEFAULT_DAILY_GOAL_MINUTES } from "../constants";
 
 export const HomeScreen: React.FC = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
-  const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.auth);
   const { totalFocusTime, focusCoins, currentStreak, badges } = useSelector(
     (state: RootState) => state.stats

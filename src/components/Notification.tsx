@@ -87,7 +87,8 @@ export const Notification: React.FC<NotificationProps> = ({
     } else {
       handleDismiss();
     }
-  }, [visible]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, duration]);
 
   const handleDismiss = () => {
     Animated.parallel([

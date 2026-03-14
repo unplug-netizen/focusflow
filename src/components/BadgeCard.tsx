@@ -10,7 +10,7 @@ interface BadgeCardProps {
   onPress?: () => void;
 }
 
-export const BadgeCard: React.FC<BadgeCardProps> = ({ badge, onPress }) => {
+export const BadgeCard: React.FC<BadgeCardProps> = ({ badge }) => {
   const { theme } = useTheme();
 
   const getTierColor = () => {

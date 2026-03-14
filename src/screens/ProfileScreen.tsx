@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../theme/ThemeContext";
 import { RootState, AppDispatch } from "../store";
-import { Card, Button, BadgeCard, Input } from "../components";
+import { Card, Button, BadgeCard } from "../components";
 import { signOut } from "../store/slices/authSlice";
 import {
   toggleDarkMode,
@@ -21,18 +21,15 @@ import {
   toggleHaptic,
   setPrivacyMode,
   toggleBedtimeMode,
-  setBedtimeMode,
 } from "../store/slices/settingsSlice";
 import { Badge } from "../types";
 
 export const ProfileScreen: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
-  const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
   const { user } = useSelector((state: RootState) => state.auth);
   const stats = useSelector((state: RootState) => state.stats);
   const settings = useSelector((state: RootState) => state.settings);
-  const [showBedtimePicker, setShowBedtimePicker] = useState(false);
 
   const unlockedBadges = stats.badges.filter((b) => b.unlockedAt);
   const lockedBadges = stats.badges.filter((b) => !b.unlockedAt);

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -83,7 +83,7 @@ export const LeaderboardScreen: React.FC = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const { entries, category, isLoading } = useSelector(
+  const { entries, category } = useSelector(
     (state: RootState) => state.leaderboard
   );
   const stats = useSelector((state: RootState) => state.stats);
@@ -243,8 +243,6 @@ export const LeaderboardScreen: React.FC = () => {
         {/* Top 3 Podium */}
         <View style={styles.podiumContainer}>
           {topEntries.slice(0, 3).map((entry, index) => {
-            const positions = [1, 0, 2]; // 2nd, 1st, 3rd
-            const position = positions[index];
             const heights = [120, 150, 100];
             const colors = ["#C0C0C0", "#FFD700", "#CD7F32"];
 

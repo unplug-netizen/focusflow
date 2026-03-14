@@ -11,10 +11,9 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useTheme } from "../theme/ThemeContext";
 import { RootState, AppDispatch } from "../store";
-import { Card, Button, Input, AppUsageCard } from "../components";
+import { Card, Input, AppUsageCard } from "../components";
 import {
   addRule,
-  updateRule,
   deleteRule,
   toggleRule,
   setAppUsages,
