@@ -1,5 +1,5 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {BlockRule, AppUsage} from '../../types';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { BlockRule, AppUsage } from "../../types";
 
 interface AppBlockerState {
   rules: BlockRule[];
@@ -16,23 +16,23 @@ const initialState: AppBlockerState = {
 };
 
 const appBlockerSlice = createSlice({
-  name: 'appBlocker',
+  name: "appBlocker",
   initialState,
   reducers: {
     addRule: (state, action: PayloadAction<BlockRule>) => {
       state.rules.push(action.payload);
     },
     updateRule: (state, action: PayloadAction<BlockRule>) => {
-      const index = state.rules.findIndex(r => r.id === action.payload.id);
+      const index = state.rules.findIndex((r) => r.id === action.payload.id);
       if (index !== -1) {
         state.rules[index] = action.payload;
       }
     },
     deleteRule: (state, action: PayloadAction<string>) => {
-      state.rules = state.rules.filter(r => r.id !== action.payload);
+      state.rules = state.rules.filter((r) => r.id !== action.payload);
     },
     toggleRule: (state, action: PayloadAction<string>) => {
-      const rule = state.rules.find(r => r.id === action.payload);
+      const rule = state.rules.find((r) => r.id === action.payload);
       if (rule) {
         rule.isActive = !rule.isActive;
       }
@@ -41,7 +41,9 @@ const appBlockerSlice = createSlice({
       state.appUsages = action.payload;
     },
     updateAppUsage: (state, action: PayloadAction<AppUsage>) => {
-      const index = state.appUsages.findIndex(a => a.packageName === action.payload.packageName);
+      const index = state.appUsages.findIndex(
+        (a) => a.packageName === action.payload.packageName
+      );
       if (index !== -1) {
         state.appUsages[index] = action.payload;
       } else {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   TextInput,
   View,
@@ -6,8 +6,8 @@ import {
   StyleSheet,
   TextInputProps,
   ViewStyle,
-} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
+} from "react-native";
+import { useTheme } from "../theme/ThemeContext";
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -26,12 +26,12 @@ export const Input: React.FC<InputProps> = ({
   style,
   ...textInputProps
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
 
   return (
     <View style={[styles.container, containerStyle]}>
       {label && (
-        <Text style={[styles.label, {color: theme.colors.textSecondary}]}>
+        <Text style={[styles.label, { color: theme.colors.textSecondary }]}>
           {label}
         </Text>
       )}
@@ -40,12 +40,11 @@ export const Input: React.FC<InputProps> = ({
           styles.inputContainer,
           {
             backgroundColor: theme.colors.surface,
-            borderColor: error
-              ? theme.colors.error
-              : theme.colors.border,
+            borderColor: error ? theme.colors.error : theme.colors.border,
             borderWidth: 1,
           },
-        ]}>
+        ]}
+      >
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
         <TextInput
           style={[
@@ -63,7 +62,7 @@ export const Input: React.FC<InputProps> = ({
         {rightIcon && <View style={styles.rightIcon}>{rightIcon}</View>}
       </View>
       {error && (
-        <Text style={[styles.error, {color: theme.colors.error}]}>
+        <Text style={[styles.error, { color: theme.colors.error }]}>
           {error}
         </Text>
       )}
@@ -77,12 +76,12 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
     marginBottom: 8,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: 12,
     minHeight: 48,
   },

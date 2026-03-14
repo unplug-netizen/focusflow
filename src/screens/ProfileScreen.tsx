@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Switch,
-} from 'react-native';
-import {useDispatch, useSelector} from 'react-redux';
-import {useNavigation} from '@react-navigation/native';
-import {useTheme} from '../theme/ThemeContext';
-import {RootState, AppDispatch} from '../store';
-import {Card, Button, BadgeCard, Input} from '../components';
-import {signOut} from '../store/slices/authSlice';
+} from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { useTheme } from "../theme/ThemeContext";
+import { RootState, AppDispatch } from "../store";
+import { Card, Button, BadgeCard, Input } from "../components";
+import { signOut } from "../store/slices/authSlice";
 import {
   toggleDarkMode,
   toggleNotifications,
@@ -22,20 +22,20 @@ import {
   setPrivacyMode,
   toggleBedtimeMode,
   setBedtimeMode,
-} from '../store/slices/settingsSlice';
-import {Badge} from '../types';
+} from "../store/slices/settingsSlice";
+import { Badge } from "../types";
 
 export const ProfileScreen: React.FC = () => {
-  const {theme, toggleTheme} = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const navigation = useNavigation();
   const dispatch = useDispatch<AppDispatch>();
-  const {user} = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const stats = useSelector((state: RootState) => state.stats);
   const settings = useSelector((state: RootState) => state.settings);
   const [showBedtimePicker, setShowBedtimePicker] = useState(false);
 
-  const unlockedBadges = stats.badges.filter(b => b.unlockedAt);
-  const lockedBadges = stats.badges.filter(b => !b.unlockedAt);
+  const unlockedBadges = stats.badges.filter((b) => b.unlockedAt);
+  const lockedBadges = stats.badges.filter((b) => !b.unlockedAt);
 
   const handleSignOut = () => {
     dispatch(signOut());
@@ -48,14 +48,16 @@ export const ProfileScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.title, {color: theme.colors.text}]}>
+          <Text style={[styles.title, { color: theme.colors.text }]}>
             Profil
           </Text>
         </View>
@@ -65,16 +67,20 @@ export const ProfileScreen: React.FC = () => {
           <View style={styles.userInfo}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
-                {user?.displayName?.charAt(0).toUpperCase() || '?'}
+                {user?.displayName?.charAt(0).toUpperCase() || "?"}
               </Text>
             </View>
             <View style={styles.userDetails}>
-              <Text style={[styles.userName, {color: theme.colors.text}]}>
-                {user?.displayName || 'Gast User'}
+              <Text style={[styles.userName, { color: theme.colors.text }]}>
+                {user?.displayName || "Gast User"}
               </Text>
               <Text
-                style={[styles.userEmail, {color: theme.colors.textSecondary}]}>
-                {user?.email || 'Anonym'}
+                style={[
+                  styles.userEmail,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                {user?.email || "Anonym"}
               </Text>
               {user?.isAnonymous && (
                 <View style={styles.anonymousBadge}>
@@ -94,29 +100,32 @@ export const ProfileScreen: React.FC = () => {
         {/* Stats Overview */}
         <View style={styles.statsGrid}>
           <Card style={styles.statCard}>
-            <Text style={[styles.statValue, {color: theme.colors.primary}]}>
+            <Text style={[styles.statValue, { color: theme.colors.primary }]}>
               {stats.focusCoins}
             </Text>
             <Text
-              style={[styles.statLabel, {color: theme.colors.textSecondary}]}>
+              style={[styles.statLabel, { color: theme.colors.textSecondary }]}
+            >
               Focus Coins
             </Text>
           </Card>
           <Card style={styles.statCard}>
-            <Text style={[styles.statValue, {color: theme.colors.text}]}>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>
               {unlockedBadges.length}
             </Text>
             <Text
-              style={[styles.statLabel, {color: theme.colors.textSecondary}]}>
+              style={[styles.statLabel, { color: theme.colors.textSecondary }]}
+            >
               Badges
             </Text>
           </Card>
           <Card style={styles.statCard}>
-            <Text style={[styles.statValue, {color: theme.colors.text}]}>
+            <Text style={[styles.statValue, { color: theme.colors.text }]}>
               {stats.currentStreak}
             </Text>
             <Text
-              style={[styles.statLabel, {color: theme.colors.textSecondary}]}>
+              style={[styles.statLabel, { color: theme.colors.textSecondary }]}
+            >
               Streak
             </Text>
           </Card>
@@ -124,7 +133,7 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Settings Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Einstellungen
           </Text>
 
@@ -132,93 +141,129 @@ export const ProfileScreen: React.FC = () => {
             {/* Dark Mode */}
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <Text style={[styles.settingLabel, {color: theme.colors.text}]}>
+                <Text
+                  style={[styles.settingLabel, { color: theme.colors.text }]}
+                >
                   🌙 Dunkelmodus
                 </Text>
                 <Text
                   style={[
                     styles.settingDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Dunkles Erscheinungsbild verwenden
                 </Text>
               </View>
               <Switch
                 value={settings.darkMode}
                 onValueChange={handleToggleDarkMode}
-                trackColor={{false: theme.colors.border, true: theme.colors.primary}}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
                 thumbColor="#fff"
               />
             </View>
 
-            <View style={[styles.divider, {backgroundColor: theme.colors.border}]} />
+            <View
+              style={[styles.divider, { backgroundColor: theme.colors.border }]}
+            />
 
             {/* Notifications */}
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <Text style={[styles.settingLabel, {color: theme.colors.text}]}>
+                <Text
+                  style={[styles.settingLabel, { color: theme.colors.text }]}
+                >
                   🔔 Benachrichtigungen
                 </Text>
                 <Text
                   style={[
                     styles.settingDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Push-Benachrichtigungen erhalten
                 </Text>
               </View>
               <Switch
                 value={settings.notificationsEnabled}
-                onValueChange={() => { dispatch(toggleNotifications()); }}
-                trackColor={{false: theme.colors.border, true: theme.colors.primary}}
+                onValueChange={() => {
+                  dispatch(toggleNotifications());
+                }}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
                 thumbColor="#fff"
               />
             </View>
 
-            <View style={[styles.divider, {backgroundColor: theme.colors.border}]} />
+            <View
+              style={[styles.divider, { backgroundColor: theme.colors.border }]}
+            />
 
             {/* Sound */}
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <Text style={[styles.settingLabel, {color: theme.colors.text}]}>
+                <Text
+                  style={[styles.settingLabel, { color: theme.colors.text }]}
+                >
                   🔊 Sound
                 </Text>
                 <Text
                   style={[
                     styles.settingDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Soundeffekte aktivieren
                 </Text>
               </View>
               <Switch
                 value={settings.soundEnabled}
-                onValueChange={() => { dispatch(toggleSound()); }}
-                trackColor={{false: theme.colors.border, true: theme.colors.primary}}
+                onValueChange={() => {
+                  dispatch(toggleSound());
+                }}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
                 thumbColor="#fff"
               />
             </View>
 
-            <View style={[styles.divider, {backgroundColor: theme.colors.border}]} />
+            <View
+              style={[styles.divider, { backgroundColor: theme.colors.border }]}
+            />
 
             {/* Haptic */}
             <View style={styles.settingItem}>
               <View style={styles.settingInfo}>
-                <Text style={[styles.settingLabel, {color: theme.colors.text}]}>
+                <Text
+                  style={[styles.settingLabel, { color: theme.colors.text }]}
+                >
                   📳 Haptisches Feedback
                 </Text>
                 <Text
                   style={[
                     styles.settingDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Vibration bei Aktionen
                 </Text>
               </View>
               <Switch
                 value={settings.hapticEnabled}
-                onValueChange={() => { dispatch(toggleHaptic()); }}
-                trackColor={{false: theme.colors.border, true: theme.colors.primary}}
+                onValueChange={() => {
+                  dispatch(toggleHaptic());
+                }}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
                 thumbColor="#fff"
               />
             </View>
@@ -227,27 +272,36 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Bedtime Mode */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Schlafenszeit-Modus
           </Text>
           <Card>
             <View style={styles.bedtimeHeader}>
               <View>
-                <Text style={[styles.bedtimeTitle, {color: theme.colors.text}]}>
+                <Text
+                  style={[styles.bedtimeTitle, { color: theme.colors.text }]}
+                >
                   Automatisch blockieren
                 </Text>
                 <Text
                   style={[
                     styles.bedtimeDescription,
-                    {color: theme.colors.textSecondary},
-                  ]}>
-                  {settings.bedtimeMode.startTime} - {settings.bedtimeMode.endTime}
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {settings.bedtimeMode.startTime} -{" "}
+                  {settings.bedtimeMode.endTime}
                 </Text>
               </View>
               <Switch
                 value={settings.bedtimeMode.enabled}
-                onValueChange={() => { dispatch(toggleBedtimeMode()); }}
-                trackColor={{false: theme.colors.border, true: theme.colors.primary}}
+                onValueChange={() => {
+                  dispatch(toggleBedtimeMode());
+                }}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
                 thumbColor="#fff"
               />
             </View>
@@ -255,19 +309,31 @@ export const ProfileScreen: React.FC = () => {
               <View style={styles.bedtimeTimes}>
                 <View style={styles.timeInput}>
                   <Text
-                    style={[styles.timeLabel, {color: theme.colors.textSecondary}]}>
+                    style={[
+                      styles.timeLabel,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
                     Start
                   </Text>
-                  <Text style={[styles.timeValue, {color: theme.colors.text}]}>
+                  <Text
+                    style={[styles.timeValue, { color: theme.colors.text }]}
+                  >
                     {settings.bedtimeMode.startTime}
                   </Text>
                 </View>
                 <View style={styles.timeInput}>
                   <Text
-                    style={[styles.timeLabel, {color: theme.colors.textSecondary}]}>
+                    style={[
+                      styles.timeLabel,
+                      { color: theme.colors.textSecondary },
+                    ]}
+                  >
                     Ende
                   </Text>
-                  <Text style={[styles.timeValue, {color: theme.colors.text}]}>
+                  <Text
+                    style={[styles.timeValue, { color: theme.colors.text }]}
+                  >
                     {settings.bedtimeMode.endTime}
                   </Text>
                 </View>
@@ -278,27 +344,32 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Privacy */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Privatsphäre
           </Text>
           <Card>
             <Text
-              style={[styles.privacyLabel, {color: theme.colors.textSecondary}]}>
+              style={[
+                styles.privacyLabel,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
               Sichtbarkeit in Ranglisten
             </Text>
             <View style={styles.privacyOptions}>
-              {(['public', 'friends', 'private'] as const).map(mode => (
+              {(["public", "friends", "private"] as const).map((mode) => (
                 <TouchableOpacity
                   key={mode}
                   style={[
                     styles.privacyOption,
                     settings.privacyMode === mode && {
-                      backgroundColor: theme.colors.primary + '20',
+                      backgroundColor: theme.colors.primary + "20",
                       borderColor: theme.colors.primary,
                     },
-                    {borderColor: theme.colors.border},
+                    { borderColor: theme.colors.border },
                   ]}
-                  onPress={() => dispatch(setPrivacyMode(mode))}>
+                  onPress={() => dispatch(setPrivacyMode(mode))}
+                >
                   <Text
                     style={[
                       styles.privacyOptionText,
@@ -308,12 +379,13 @@ export const ProfileScreen: React.FC = () => {
                             ? theme.colors.primary
                             : theme.colors.text,
                       },
-                    ]}>
-                    {mode === 'public'
-                      ? '🌍 Öffentlich'
-                      : mode === 'friends'
-                      ? '👥 Freunde'
-                      : '🔒 Privat'}
+                    ]}
+                  >
+                    {mode === "public"
+                      ? "🌍 Öffentlich"
+                      : mode === "friends"
+                      ? "👥 Freunde"
+                      : "🔒 Privat"}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -323,7 +395,7 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Badges Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Alle Badges ({unlockedBadges.length}/{stats.badges.length})
           </Text>
 
@@ -332,8 +404,9 @@ export const ProfileScreen: React.FC = () => {
               <Text
                 style={[
                   styles.subsectionTitle,
-                  {color: theme.colors.textSecondary},
-                ]}>
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 Freigeschaltet
               </Text>
               {unlockedBadges.map((badge: Badge) => (
@@ -347,8 +420,9 @@ export const ProfileScreen: React.FC = () => {
               <Text
                 style={[
                   styles.subsectionTitle,
-                  {color: theme.colors.textSecondary},
-                ]}>
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 Noch zu erreichen
               </Text>
               {lockedBadges.map((badge: Badge) => (
@@ -360,29 +434,33 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Account Actions */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Konto
           </Text>
           <Card style={styles.accountCard}>
             <TouchableOpacity style={styles.accountItem}>
-              <Text style={[styles.accountText, {color: theme.colors.text}]}>
+              <Text style={[styles.accountText, { color: theme.colors.text }]}>
                 📊 Daten exportieren
               </Text>
-              <Text style={{color: theme.colors.textSecondary}}>→</Text>
+              <Text style={{ color: theme.colors.textSecondary }}>→</Text>
             </TouchableOpacity>
-            <View style={[styles.divider, {backgroundColor: theme.colors.border}]} />
+            <View
+              style={[styles.divider, { backgroundColor: theme.colors.border }]}
+            />
             <TouchableOpacity style={styles.accountItem}>
-              <Text style={[styles.accountText, {color: theme.colors.text}]}>
+              <Text style={[styles.accountText, { color: theme.colors.text }]}>
                 ❓ Hilfe & Support
               </Text>
-              <Text style={{color: theme.colors.textSecondary}}>→</Text>
+              <Text style={{ color: theme.colors.textSecondary }}>→</Text>
             </TouchableOpacity>
-            <View style={[styles.divider, {backgroundColor: theme.colors.border}]} />
+            <View
+              style={[styles.divider, { backgroundColor: theme.colors.border }]}
+            />
             <TouchableOpacity style={styles.accountItem}>
-              <Text style={[styles.accountText, {color: theme.colors.text}]}>
+              <Text style={[styles.accountText, { color: theme.colors.text }]}>
                 📋 Datenschutzrichtlinie
               </Text>
-              <Text style={{color: theme.colors.textSecondary}}>→</Text>
+              <Text style={{ color: theme.colors.textSecondary }}>→</Text>
             </TouchableOpacity>
           </Card>
 
@@ -395,7 +473,7 @@ export const ProfileScreen: React.FC = () => {
         </View>
 
         {/* Version */}
-        <Text style={[styles.version, {color: theme.colors.textSecondary}]}>
+        <Text style={[styles.version, { color: theme.colors.textSecondary }]}>
           FocusFlow v0.0.1
         </Text>
       </ScrollView>
@@ -419,36 +497,36 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   userCard: {
     marginBottom: 16,
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 16,
   },
   avatar: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#00d4aa',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#00d4aa",
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 16,
   },
   avatarText: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
+    fontWeight: "700",
+    color: "#fff",
   },
   userDetails: {
     flex: 1,
   },
   userName: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 4,
   },
   userEmail: {
@@ -456,30 +534,30 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   anonymousBadge: {
-    backgroundColor: 'rgba(128, 128, 128, 0.2)',
+    backgroundColor: "rgba(128, 128, 128, 0.2)",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 4,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   anonymousText: {
     fontSize: 10,
-    fontWeight: '600',
-    color: '#888',
+    fontWeight: "600",
+    color: "#888",
   },
   statsGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 24,
   },
   statCard: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 16,
   },
   statValue: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 4,
   },
   statLabel: {
@@ -490,12 +568,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 12,
   },
   subsectionTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
     marginTop: 8,
   },
@@ -503,9 +581,9 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
   },
   settingInfo: {
@@ -514,7 +592,7 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   settingDescription: {
@@ -525,25 +603,25 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   bedtimeHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 16,
   },
   bedtimeTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   bedtimeDescription: {
     fontSize: 14,
   },
   bedtimeTimes: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(128, 128, 128, 0.2)',
+    borderTopColor: "rgba(128, 128, 128, 0.2)",
   },
   timeInput: {
     flex: 1,
@@ -554,14 +632,14 @@ const styles = StyleSheet.create({
   },
   timeValue: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   privacyLabel: {
     fontSize: 14,
     marginBottom: 12,
   },
   privacyOptions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   privacyOption: {
@@ -569,19 +647,19 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     borderWidth: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   privacyOptionText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   accountCard: {
     padding: 0,
   },
   accountItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 16,
   },
   accountText: {
@@ -591,7 +669,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   version: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
     marginTop: 8,
   },

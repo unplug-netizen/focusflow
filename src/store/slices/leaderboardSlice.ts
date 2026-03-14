@@ -1,6 +1,6 @@
-import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
-import firestore from '@react-native-firebase/firestore';
-import {LeaderboardEntry, LeaderboardCategory} from '../../types';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import firestore from "@react-native-firebase/firestore";
+import { LeaderboardEntry, LeaderboardCategory } from "../../types";
 
 interface LeaderboardState {
   entries: LeaderboardEntry[];
@@ -11,23 +11,23 @@ interface LeaderboardState {
 
 const initialState: LeaderboardState = {
   entries: [],
-  category: 'screen_time',
+  category: "screen_time",
   isLoading: false,
   userRank: 0,
 };
 
 export const fetchLeaderboard = createAsyncThunk(
-  'leaderboard/fetchLeaderboard',
-  async (category: LeaderboardCategory, {rejectWithValue}) => {
+  "leaderboard/fetchLeaderboard",
+  async (category: LeaderboardCategory, { rejectWithValue }) => {
     try {
       const snapshot = await firestore()
-        .collection('leaderboard')
+        .collection("leaderboard")
         .doc(category)
-        .collection('entries')
-        .orderBy('score', 'desc')
+        .collection("entries")
+        .orderBy("score", "desc")
         .limit(100)
         .get();
-      
+
       const entries: LeaderboardEntry[] = snapshot.docs.map((doc, index) => ({
         rank: index + 1,
         userId: doc.id,
@@ -37,7 +37,7 @@ export const fetchLeaderboard = createAsyncThunk(
         streak: doc.data().streak || 0,
         isCurrentUser: false,
       }));
-      
+
       return entries;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -46,24 +46,30 @@ export const fetchLeaderboard = createAsyncThunk(
 );
 
 export const updateLeaderboardScore = createAsyncThunk(
-  'leaderboard/updateScore',
-  async ({category, score}: {category: LeaderboardCategory; score: number}, {getState, rejectWithValue}) => {
+  "leaderboard/updateScore",
+  async (
+    { category, score }: { category: LeaderboardCategory; score: number },
+    { getState, rejectWithValue }
+  ) => {
     try {
       const state = getState() as any;
       const userId = state.auth.user?.id;
-      
-      if (!userId) return rejectWithValue('User not authenticated');
-      
+
+      if (!userId) return rejectWithValue("User not authenticated");
+
       await firestore()
-        .collection('leaderboard')
+        .collection("leaderboard")
         .doc(category)
-        .collection('entries')
+        .collection("entries")
         .doc(userId)
-        .set({
-          score,
-          updatedAt: firestore.FieldValue.serverTimestamp(),
-        }, {merge: true});
-      
+        .set(
+          {
+            score,
+            updatedAt: firestore.FieldValue.serverTimestamp(),
+          },
+          { merge: true }
+        );
+
       return true;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -72,7 +78,7 @@ export const updateLeaderboardScore = createAsyncThunk(
 );
 
 const leaderboardSlice = createSlice({
-  name: 'leaderboard',
+  name: "leaderboard",
   initialState,
   reducers: {
     setCategory: (state, action: PayloadAction<LeaderboardCategory>) => {
@@ -97,5 +103,5 @@ const leaderboardSlice = createSlice({
   },
 });
 
-export const {setCategory, setUserRank} = leaderboardSlice.actions;
+export const { setCategory, setUserRank } = leaderboardSlice.actions;
 export default leaderboardSlice.reducer;

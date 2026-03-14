@@ -1,8 +1,8 @@
-import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
-import Card from './Card';
-import ProgressBar from './ProgressBar';
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { useTheme } from "../theme/ThemeContext";
+import Card from "./Card";
+import ProgressBar from "./ProgressBar";
 
 interface StatCardProps {
   title: string;
@@ -11,7 +11,7 @@ interface StatCardProps {
   icon?: string;
   progress?: number;
   progressTotal?: number;
-  trend?: 'up' | 'down' | 'neutral';
+  trend?: "up" | "down" | "neutral";
   trendValue?: string;
 }
 
@@ -25,13 +25,13 @@ export const StatCard: React.FC<StatCardProps> = ({
   trend,
   trendValue,
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
 
   const getTrendColor = () => {
     switch (trend) {
-      case 'up':
+      case "up":
         return theme.colors.success;
-      case 'down':
+      case "down":
         return theme.colors.error;
       default:
         return theme.colors.textSecondary;
@@ -40,26 +40,26 @@ export const StatCard: React.FC<StatCardProps> = ({
 
   const getTrendIcon = () => {
     switch (trend) {
-      case 'up':
-        return '↑';
-      case 'down':
-        return '↓';
+      case "up":
+        return "↑";
+      case "down":
+        return "↓";
       default:
-        return '→';
+        return "→";
     }
   };
 
   return (
     <Card style={styles.container}>
       <View style={styles.header}>
-        <Text style={[styles.title, {color: theme.colors.textSecondary}]}>
+        <Text style={[styles.title, { color: theme.colors.textSecondary }]}>
           {title}
         </Text>
         {icon && <Text style={styles.icon}>{icon}</Text>}
       </View>
-      <Text style={[styles.value, {color: theme.colors.text}]}>{value}</Text>
+      <Text style={[styles.value, { color: theme.colors.text }]}>{value}</Text>
       {subtitle && (
-        <Text style={[styles.subtitle, {color: theme.colors.textSecondary}]}>
+        <Text style={[styles.subtitle, { color: theme.colors.textSecondary }]}>
           {subtitle}
         </Text>
       )}
@@ -75,10 +75,10 @@ export const StatCard: React.FC<StatCardProps> = ({
       )}
       {trend && trendValue && (
         <View style={styles.trendContainer}>
-          <Text style={[styles.trendIcon, {color: getTrendColor()}]}>
+          <Text style={[styles.trendIcon, { color: getTrendColor() }]}>
             {getTrendIcon()}
           </Text>
-          <Text style={[styles.trendValue, {color: getTrendColor()}]}>
+          <Text style={[styles.trendValue, { color: getTrendColor() }]}>
             {trendValue}
           </Text>
         </View>
@@ -93,15 +93,15 @@ const styles = StyleSheet.create({
     minWidth: 140,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 8,
   },
   title: {
     fontSize: 12,
-    fontWeight: '500',
-    textTransform: 'uppercase',
+    fontWeight: "500",
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   icon: {
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 4,
   },
   subtitle: {
@@ -119,8 +119,8 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   trendContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 8,
   },
   trendIcon: {
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
   },
   trendValue: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
 

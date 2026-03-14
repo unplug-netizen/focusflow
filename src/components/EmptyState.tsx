@@ -1,7 +1,7 @@
-import React from 'react';
-import {View, Text, StyleSheet, ViewStyle} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
-import {Button} from './Button';
+import React from "react";
+import { View, Text, StyleSheet, ViewStyle } from "react-native";
+import { useTheme } from "../theme/ThemeContext";
+import { Button } from "./Button";
 
 interface EmptyStateProps {
   icon: string;
@@ -20,16 +20,16 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   onAction,
   style,
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
 
   return (
     <View style={[styles.container, style]}>
       <Text style={styles.icon}>{icon}</Text>
-      <Text style={[styles.title, {color: theme.colors.text}]}>
-        {title}
-      </Text>
+      <Text style={[styles.title, { color: theme.colors.text }]}>{title}</Text>
       {description && (
-        <Text style={[styles.description, {color: theme.colors.textSecondary}]}>
+        <Text
+          style={[styles.description, { color: theme.colors.textSecondary }]}
+        >
           {description}
         </Text>
       )}
@@ -47,8 +47,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 32,
   },
   icon: {
@@ -57,13 +57,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   description: {
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 24,
     lineHeight: 20,
   },

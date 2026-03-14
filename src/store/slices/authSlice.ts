@@ -1,7 +1,7 @@
-import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
-import auth from '@react-native-firebase/auth';
-import firestore from '@react-native-firebase/firestore';
-import {User} from '../../types';
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import auth from "@react-native-firebase/auth";
+import firestore from "@react-native-firebase/firestore";
+import { User } from "../../types";
 
 interface AuthState {
   user: User | null;
@@ -18,25 +18,29 @@ const initialState: AuthState = {
 };
 
 export const signInAnonymously = createAsyncThunk(
-  'auth/signInAnonymously',
-  async (_, {rejectWithValue}) => {
+  "auth/signInAnonymously",
+  async (_, { rejectWithValue }) => {
     try {
       const userCredential = await auth().signInAnonymously();
-      const {uid, email, displayName, photoURL, isAnonymous} = userCredential.user;
-      
+      const { uid, email, displayName, photoURL, isAnonymous } =
+        userCredential.user;
+
       const userData: User = {
         id: uid,
-        email: email || '',
-        displayName: displayName || 'Anonymous User',
+        email: email || "",
+        displayName: displayName || "Anonymous User",
         photoURL: photoURL || undefined,
         createdAt: new Date(),
         lastLoginAt: new Date(),
         isAnonymous,
       };
-      
+
       // Save to Firestore
-      await firestore().collection('users').doc(uid).set(userData, {merge: true});
-      
+      await firestore()
+        .collection("users")
+        .doc(uid)
+        .set(userData, { merge: true });
+
       return userData;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -45,26 +49,32 @@ export const signInAnonymously = createAsyncThunk(
 );
 
 export const signInWithEmail = createAsyncThunk(
-  'auth/signInWithEmail',
-  async ({email, password}: {email: string; password: string}, {rejectWithValue}) => {
+  "auth/signInWithEmail",
+  async (
+    { email, password }: { email: string; password: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const userCredential = await auth().signInWithEmailAndPassword(email, password);
+      const userCredential = await auth().signInWithEmailAndPassword(
+        email,
+        password
+      );
       const user = userCredential.user;
-      
+
       const userData: User = {
         id: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || 'User',
+        email: user.email || "",
+        displayName: user.displayName || "User",
         photoURL: user.photoURL || undefined,
         createdAt: new Date(),
         lastLoginAt: new Date(),
         isAnonymous: false,
       };
-      
-      await firestore().collection('users').doc(user.uid).update({
+
+      await firestore().collection("users").doc(user.uid).update({
         lastLoginAt: new Date(),
       });
-      
+
       return userData;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -73,25 +83,35 @@ export const signInWithEmail = createAsyncThunk(
 );
 
 export const signUpWithEmail = createAsyncThunk(
-  'auth/signUpWithEmail',
-  async ({email, password, displayName}: {email: string; password: string; displayName: string}, {rejectWithValue}) => {
+  "auth/signUpWithEmail",
+  async (
+    {
+      email,
+      password,
+      displayName,
+    }: { email: string; password: string; displayName: string },
+    { rejectWithValue }
+  ) => {
     try {
-      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      const userCredential = await auth().createUserWithEmailAndPassword(
+        email,
+        password
+      );
       const user = userCredential.user;
-      
-      await user.updateProfile({displayName});
-      
+
+      await user.updateProfile({ displayName });
+
       const userData: User = {
         id: user.uid,
-        email: user.email || '',
+        email: user.email || "",
         displayName,
         createdAt: new Date(),
         lastLoginAt: new Date(),
         isAnonymous: false,
       };
-      
-      await firestore().collection('users').doc(user.uid).set(userData);
-      
+
+      await firestore().collection("users").doc(user.uid).set(userData);
+
       return userData;
     } catch (error: any) {
       return rejectWithValue(error.message);
@@ -100,8 +120,8 @@ export const signUpWithEmail = createAsyncThunk(
 );
 
 export const signOut = createAsyncThunk(
-  'auth/signOut',
-  async (_, {rejectWithValue}) => {
+  "auth/signOut",
+  async (_, { rejectWithValue }) => {
     try {
       await auth().signOut();
       return true;
@@ -112,7 +132,7 @@ export const signOut = createAsyncThunk(
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     setUser: (state, action: PayloadAction<User | null>) => {
@@ -172,5 +192,5 @@ const authSlice = createSlice({
   },
 });
 
-export const {setUser, clearError} = authSlice.actions;
+export const { setUser, clearError } = authSlice.actions;
 export default authSlice.reducer;

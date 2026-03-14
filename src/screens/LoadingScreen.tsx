@@ -1,18 +1,16 @@
-import React from 'react';
-import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
+import React from "react";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { useTheme } from "../theme/ThemeContext";
 
 export const LoadingScreen: React.FC = () => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
 
   return (
     <View
-      style={[
-        styles.container,
-        {backgroundColor: theme.colors.background},
-      ]}>
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <Text style={styles.logoIcon}>🎯</Text>
-      <Text style={[styles.logoText, {color: theme.colors.text}]}>
+      <Text style={[styles.logoText, { color: theme.colors.text }]}>
         FocusFlow
       </Text>
       <ActivityIndicator
@@ -27,8 +25,8 @@ export const LoadingScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   logoIcon: {
     fontSize: 64,
@@ -36,7 +34,7 @@ const styles = StyleSheet.create({
   },
   logoText: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 24,
   },
   loader: {

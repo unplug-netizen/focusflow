@@ -1,24 +1,24 @@
-import '@testing-library/jest-native/extend-expect';
+import "@testing-library/jest-native/extend-expect";
 
 // Mock react-native modules
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
+jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
 
 // Mock AsyncStorage
-jest.mock('@react-native-async-storage/async-storage', () => ({
+jest.mock("@react-native-async-storage/async-storage", () => ({
   setItem: jest.fn(),
   getItem: jest.fn(),
   removeItem: jest.fn(),
 }));
 
 // Mock Firebase
-jest.mock('@react-native-firebase/app', () => ({
+jest.mock("@react-native-firebase/app", () => ({
   __esModule: true,
   default: jest.fn(() => ({
     apps: [],
   })),
 }));
 
-jest.mock('@react-native-firebase/auth', () => ({
+jest.mock("@react-native-firebase/auth", () => ({
   __esModule: true,
   default: jest.fn(() => ({
     signInAnonymously: jest.fn(),
@@ -30,7 +30,7 @@ jest.mock('@react-native-firebase/auth', () => ({
   })),
 }));
 
-jest.mock('@react-native-firebase/firestore', () => ({
+jest.mock("@react-native-firebase/firestore", () => ({
   __esModule: true,
   default: jest.fn(() => ({
     collection: jest.fn(() => ({
@@ -52,4 +52,4 @@ jest.mock('@react-native-firebase/firestore', () => ({
 }));
 
 // Silence the warning: Animated: `useNativeDriver` is not supported
-jest.mock('react-native/Libraries/Animated/src/NativeAnimatedHelper');
+jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");

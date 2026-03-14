@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -6,44 +6,56 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-} from 'react-native';
-import {useSelector} from 'react-redux';
-import {useNavigation} from '@react-navigation/native';
-import {useTheme} from '../theme/ThemeContext';
-import {RootState} from '../store';
-import {Card, StatCard, BadgeCard, ProgressBar, BarChart} from '../components';
-import {Badge} from '../types';
+} from "react-native";
+import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { useTheme } from "../theme/ThemeContext";
+import { RootState } from "../store";
+import {
+  Card,
+  StatCard,
+  BadgeCard,
+  ProgressBar,
+  BarChart,
+} from "../components";
+import { Badge } from "../types";
 
 export const StatsScreen: React.FC = () => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const navigation = useNavigation();
   const stats = useSelector((state: RootState) => state.stats);
-  const {sessions} = useSelector((state: RootState) => state.focusMode);
+  const { sessions } = useSelector((state: RootState) => state.focusMode);
 
   const totalSessions = sessions.length;
-  const completedSessions = sessions.filter(s => s.completed).length;
-  const completionRate = totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
+  const completedSessions = sessions.filter((s) => s.completed).length;
+  const completionRate =
+    totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
 
-  const unlockedBadges = stats.badges.filter(b => b.unlockedAt);
-  const lockedBadges = stats.badges.filter(b => !b.unlockedAt);
+  const unlockedBadges = stats.badges.filter((b) => b.unlockedAt);
+  const lockedBadges = stats.badges.filter((b) => !b.unlockedAt);
 
   const maxScreenTime = Math.max(...stats.weeklyScreenTime, 1);
 
   return (
     <SafeAreaView
-      style={[styles.container, {backgroundColor: theme.colors.background}]}>
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={[styles.title, {color: theme.colors.text}]}>
+          <Text style={[styles.title, { color: theme.colors.text }]}>
             Statistiken
           </Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate('Leaderboard' as never)}>
-            <Text style={[styles.leaderboardLink, {color: theme.colors.primary}]}>
+            onPress={() => navigation.navigate("Leaderboard" as never)}
+          >
+            <Text
+              style={[styles.leaderboardLink, { color: theme.colors.primary }]}
+            >
               Rangliste →
             </Text>
           </TouchableOpacity>
@@ -88,7 +100,7 @@ export const StatsScreen: React.FC = () => {
 
         {/* Weekly Screen Time Chart */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Wöchentliche Bildschirmzeit
           </Text>
           <Card>
@@ -104,16 +116,24 @@ export const StatsScreen: React.FC = () => {
                 <View
                   style={[
                     styles.legendDot,
-                    {backgroundColor: theme.colors.primary},
+                    { backgroundColor: theme.colors.primary },
                   ]}
                 />
                 <Text
-                  style={[styles.legendText, {color: theme.colors.textSecondary}]}>
+                  style={[
+                    styles.legendText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Heute
                 </Text>
               </View>
               <Text
-                style={[styles.averageText, {color: theme.colors.textSecondary}]}>
+                style={[
+                  styles.averageText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 Ø {Math.round(stats.dailyAverage)}m/Tag
               </Text>
             </View>
@@ -122,49 +142,55 @@ export const StatsScreen: React.FC = () => {
 
         {/* Focus Sessions Stats */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Fokus-Sitzungen
           </Text>
           <Card>
             <View style={styles.sessionStats}>
               <View style={styles.sessionItem}>
                 <Text
-                  style={[styles.sessionValue, {color: theme.colors.text}]}>
+                  style={[styles.sessionValue, { color: theme.colors.text }]}
+                >
                   {totalSessions}
                 </Text>
                 <Text
                   style={[
                     styles.sessionLabel,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Gesamt
                 </Text>
               </View>
               <View style={styles.sessionDivider} />
               <View style={styles.sessionItem}>
                 <Text
-                  style={[styles.sessionValue, {color: theme.colors.success}]}>
+                  style={[styles.sessionValue, { color: theme.colors.success }]}
+                >
                   {completedSessions}
                 </Text>
                 <Text
                   style={[
                     styles.sessionLabel,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Abgeschlossen
                 </Text>
               </View>
               <View style={styles.sessionDivider} />
               <View style={styles.sessionItem}>
                 <Text
-                  style={[styles.sessionValue, {color: theme.colors.primary}]}>
+                  style={[styles.sessionValue, { color: theme.colors.primary }]}
+                >
                   {Math.round(completionRate)}%
                 </Text>
                 <Text
                   style={[
                     styles.sessionLabel,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Erfolgsrate
                 </Text>
               </View>
@@ -182,11 +208,12 @@ export const StatsScreen: React.FC = () => {
         {/* Badges Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
               Badges
             </Text>
             <Text
-              style={[styles.badgeCount, {color: theme.colors.textSecondary}]}>
+              style={[styles.badgeCount, { color: theme.colors.textSecondary }]}
+            >
               {unlockedBadges.length}/{stats.badges.length}
             </Text>
           </View>
@@ -197,8 +224,9 @@ export const StatsScreen: React.FC = () => {
               <Text
                 style={[
                   styles.subsectionTitle,
-                  {color: theme.colors.textSecondary},
-                ]}>
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 Freigeschaltet
               </Text>
               {unlockedBadges.map((badge: Badge) => (
@@ -213,8 +241,9 @@ export const StatsScreen: React.FC = () => {
               <Text
                 style={[
                   styles.subsectionTitle,
-                  {color: theme.colors.textSecondary},
-                ]}>
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
                 In Arbeit
               </Text>
               {lockedBadges.slice(0, 3).map((badge: Badge) => (
@@ -223,12 +252,14 @@ export const StatsScreen: React.FC = () => {
               {lockedBadges.length > 3 && (
                 <TouchableOpacity
                   style={styles.showMoreButton}
-                  onPress={() => navigation.navigate('Profile' as never)}>
+                  onPress={() => navigation.navigate("Profile" as never)}
+                >
                   <Text
                     style={[
                       styles.showMoreText,
-                      {color: theme.colors.primary},
-                    ]}>
+                      { color: theme.colors.primary },
+                    ]}
+                  >
                     +{lockedBadges.length - 3} weitere anzeigen
                   </Text>
                 </TouchableOpacity>
@@ -239,34 +270,38 @@ export const StatsScreen: React.FC = () => {
 
         {/* Monthly Progress */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Monatlicher Fortschritt
           </Text>
           <Card>
             <View style={styles.monthlyStats}>
               <View style={styles.monthlyItem}>
                 <Text
-                  style={[styles.monthlyValue, {color: theme.colors.text}]}>
+                  style={[styles.monthlyValue, { color: theme.colors.text }]}
+                >
                   {stats.longestStreak}
                 </Text>
                 <Text
                   style={[
                     styles.monthlyLabel,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Längster Streak
                 </Text>
               </View>
               <View style={styles.monthlyItem}>
                 <Text
-                  style={[styles.monthlyValue, {color: theme.colors.text}]}>
+                  style={[styles.monthlyValue, { color: theme.colors.text }]}
+                >
                   {Math.floor(stats.totalBlockedTime / 60)}h
                 </Text>
                 <Text
                   style={[
                     styles.monthlyLabel,
-                    {color: theme.colors.textSecondary},
-                  ]}>
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   Blockierte Zeit
                 </Text>
               </View>
@@ -290,21 +325,21 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 20,
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   leaderboardLink: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   statsGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 12,
   },
@@ -312,30 +347,30 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   badgeCount: {
     fontSize: 14,
   },
   chartLegend: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(128, 128, 128, 0.2)',
+    borderTopColor: "rgba(128, 128, 128, 0.2)",
   },
   legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   legendDot: {
     width: 8,
@@ -350,16 +385,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   sessionStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
   },
   sessionItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   sessionValue: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   sessionLabel: {
     fontSize: 12,
@@ -368,35 +403,35 @@ const styles = StyleSheet.create({
   sessionDivider: {
     width: 1,
     height: 40,
-    backgroundColor: 'rgba(128, 128, 128, 0.2)',
+    backgroundColor: "rgba(128, 128, 128, 0.2)",
   },
   completionBar: {
     marginTop: 20,
   },
   subsectionTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 12,
     marginTop: 8,
   },
   showMoreButton: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
   },
   showMoreText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   monthlyStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
   },
   monthlyItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   monthlyValue: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   monthlyLabel: {
     fontSize: 12,

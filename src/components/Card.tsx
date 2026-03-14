@@ -1,29 +1,29 @@
-import React from 'react';
-import {View, StyleSheet, ViewStyle} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
+import React from "react";
+import { View, StyleSheet, ViewStyle } from "react-native";
+import { useTheme } from "../theme/ThemeContext";
 
 interface CardProps {
   children: React.ReactNode;
   style?: ViewStyle | ViewStyle[];
-  padding?: 'none' | 'small' | 'medium' | 'large';
-  elevation?: 'none' | 'small' | 'medium' | 'large';
+  padding?: "none" | "small" | "medium" | "large";
+  elevation?: "none" | "small" | "medium" | "large";
 }
 
 export const Card: React.FC<CardProps> = ({
   children,
   style,
-  padding = 'medium',
-  elevation = 'small',
+  padding = "medium",
+  elevation = "small",
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
 
   const getPadding = () => {
     switch (padding) {
-      case 'none':
+      case "none":
         return 0;
-      case 'small':
+      case "small":
         return 12;
-      case 'large':
+      case "large":
         return 24;
       default:
         return 16;
@@ -32,22 +32,22 @@ export const Card: React.FC<CardProps> = ({
 
   const getElevation = () => {
     switch (elevation) {
-      case 'none':
+      case "none":
         return {
           shadowOpacity: 0,
           elevation: 0,
         };
-      case 'small':
+      case "small":
         return {
           shadowOpacity: 0.1,
           elevation: 2,
         };
-      case 'medium':
+      case "medium":
         return {
           shadowOpacity: 0.15,
           elevation: 4,
         };
-      case 'large':
+      case "large":
         return {
           shadowOpacity: 0.2,
           elevation: 8,
@@ -69,13 +69,14 @@ export const Card: React.FC<CardProps> = ({
         {
           backgroundColor: theme.colors.surface,
           padding: getPadding(),
-          shadowColor: theme.dark ? '#000' : '#000',
-          shadowOffset: {width: 0, height: 2},
+          shadowColor: theme.dark ? "#000" : "#000",
+          shadowOffset: { width: 0, height: 2 },
           shadowRadius: 4,
           ...elevationStyles,
         },
         style,
-      ]}>
+      ]}
+    >
       {children}
     </View>
   );

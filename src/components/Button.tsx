@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   TouchableOpacity,
   Text,
@@ -6,14 +6,14 @@ import {
   ActivityIndicator,
   ViewStyle,
   TextStyle,
-} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
+} from "react-native";
+import { useTheme } from "../theme/ThemeContext";
 
 interface ButtonProps {
   onPress: () => void;
   title: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'small' | 'medium' | 'large';
+  variant?: "primary" | "secondary" | "outline" | "ghost";
+  size?: "small" | "medium" | "large";
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
@@ -24,26 +24,26 @@ interface ButtonProps {
 export const Button: React.FC<ButtonProps> = ({
   onPress,
   title,
-  variant = 'primary',
-  size = 'medium',
+  variant = "primary",
+  size = "medium",
   disabled = false,
   loading = false,
   style,
   textStyle,
   icon,
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
 
   const getBackgroundColor = () => {
     if (disabled) return theme.colors.border;
     switch (variant) {
-      case 'primary':
+      case "primary":
         return theme.colors.primary;
-      case 'secondary':
+      case "secondary":
         return theme.colors.secondary;
-      case 'outline':
-      case 'ghost':
-        return 'transparent';
+      case "outline":
+      case "ghost":
+        return "transparent";
       default:
         return theme.colors.primary;
     }
@@ -52,33 +52,33 @@ export const Button: React.FC<ButtonProps> = ({
   const getTextColor = () => {
     if (disabled) return theme.colors.textSecondary;
     switch (variant) {
-      case 'primary':
-      case 'secondary':
-        return '#ffffff';
-      case 'outline':
-      case 'ghost':
+      case "primary":
+      case "secondary":
+        return "#ffffff";
+      case "outline":
+      case "ghost":
         return theme.colors.primary;
       default:
-        return '#ffffff';
+        return "#ffffff";
     }
   };
 
   const getPadding = () => {
     switch (size) {
-      case 'small':
-        return {paddingVertical: 8, paddingHorizontal: 16};
-      case 'large':
-        return {paddingVertical: 16, paddingHorizontal: 32};
+      case "small":
+        return { paddingVertical: 8, paddingHorizontal: 16 };
+      case "large":
+        return { paddingVertical: 16, paddingHorizontal: 32 };
       default:
-        return {paddingVertical: 12, paddingHorizontal: 24};
+        return { paddingVertical: 12, paddingHorizontal: 24 };
     }
   };
 
   const getFontSize = () => {
     switch (size) {
-      case 'small':
+      case "small":
         return 14;
-      case 'large':
+      case "large":
         return 18;
       default:
         return 16;
@@ -94,12 +94,13 @@ export const Button: React.FC<ButtonProps> = ({
         styles.button,
         {
           backgroundColor: getBackgroundColor(),
-          borderWidth: variant === 'outline' ? 2 : 0,
+          borderWidth: variant === "outline" ? 2 : 0,
           borderColor: theme.colors.primary,
           ...getPadding(),
         },
         style,
-      ]}>
+      ]}
+    >
       {loading ? (
         <ActivityIndicator color={getTextColor()} />
       ) : (
@@ -114,7 +115,8 @@ export const Button: React.FC<ButtonProps> = ({
                 marginLeft: icon ? 8 : 0,
               },
               textStyle,
-            ]}>
+            ]}
+          >
             {title}
           </Text>
         </>
@@ -126,12 +128,12 @@ export const Button: React.FC<ButtonProps> = ({
 const styles = StyleSheet.create({
   button: {
     borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
   text: {
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
 

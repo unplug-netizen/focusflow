@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,10 +6,10 @@ import {
   Animated,
   TouchableOpacity,
   ViewStyle,
-} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
+} from "react-native";
+import { useTheme } from "../theme/ThemeContext";
 
-export type NotificationType = 'success' | 'error' | 'warning' | 'info';
+export type NotificationType = "success" | "error" | "warning" | "info";
 
 interface NotificationProps {
   visible: boolean;
@@ -25,7 +25,7 @@ interface NotificationProps {
 
 export const Notification: React.FC<NotificationProps> = ({
   visible,
-  type = 'info',
+  type = "info",
   title,
   message,
   onDismiss,
@@ -34,31 +34,31 @@ export const Notification: React.FC<NotificationProps> = ({
   actionLabel,
   onAction,
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   const getColors = () => {
     switch (type) {
-      case 'success':
+      case "success":
         return {
           background: theme.colors.success,
-          icon: '✓',
+          icon: "✓",
         };
-      case 'error':
+      case "error":
         return {
           background: theme.colors.error,
-          icon: '✕',
+          icon: "✕",
         };
-      case 'warning':
+      case "warning":
         return {
           background: theme.colors.warning,
-          icon: '⚠',
+          icon: "⚠",
         };
       default:
         return {
           background: theme.colors.primary,
-          icon: 'ℹ',
+          icon: "ℹ",
         };
     }
   };
@@ -114,11 +114,12 @@ export const Notification: React.FC<NotificationProps> = ({
         styles.container,
         {
           backgroundColor: colors.background,
-          transform: [{translateY}],
+          transform: [{ translateY }],
           opacity,
         },
         style,
-      ]}>
+      ]}
+    >
       <View style={styles.content}>
         <Text style={styles.icon}>{colors.icon}</Text>
         <View style={styles.textContainer}>
@@ -140,7 +141,7 @@ export const Notification: React.FC<NotificationProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -150,45 +151,45 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   content: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   icon: {
     fontSize: 20,
     marginRight: 12,
-    color: '#fff',
+    color: "#fff",
   },
   textContainer: {
     flex: 1,
   },
   title: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 2,
   },
   message: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
   },
   actionButton: {
     marginLeft: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: "rgba(255,255,255,0.2)",
     borderRadius: 6,
   },
   actionText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   closeButton: {
     marginLeft: 12,
     padding: 4,
   },
   closeText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
 });

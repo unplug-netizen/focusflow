@@ -1,6 +1,6 @@
-import React from 'react';
-import {View, Text, StyleSheet, ViewStyle, Dimensions} from 'react-native';
-import {useTheme} from '../theme/ThemeContext';
+import React from "react";
+import { View, Text, StyleSheet, ViewStyle, Dimensions } from "react-native";
+import { useTheme } from "../theme/ThemeContext";
 
 interface BarChartProps {
   data: number[];
@@ -13,7 +13,7 @@ interface BarChartProps {
   barWidth?: number;
 }
 
-const {width: screenWidth} = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get("window");
 
 export const BarChart: React.FC<BarChartProps> = ({
   data,
@@ -25,11 +25,11 @@ export const BarChart: React.FC<BarChartProps> = ({
   showValues = false,
   barWidth = 24,
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const chartColor = color || theme.colors.primary;
   const chartSecondaryColor = secondaryColor || theme.colors.secondary;
   const max = maxValue || Math.max(...data, 1);
-  const defaultLabels = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  const defaultLabels = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
   const chartLabels = labels || defaultLabels.slice(0, data.length);
 
   return (
@@ -38,11 +38,16 @@ export const BarChart: React.FC<BarChartProps> = ({
         {data.map((value, index) => {
           const height = max > 0 ? (value / max) * 100 : 0;
           const isToday = index === data.length - 1;
-          
+
           return (
             <View key={index} style={styles.barWrapper}>
               {showValues && value > 0 && (
-                <Text style={[styles.valueLabel, {color: theme.colors.textSecondary}]}>
+                <Text
+                  style={[
+                    styles.valueLabel,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
                   {Math.round(value)}
                 </Text>
               )}
@@ -52,15 +57,19 @@ export const BarChart: React.FC<BarChartProps> = ({
                     styles.bar,
                     {
                       height: `${Math.max(height, 4)}%`,
-                      backgroundColor: isToday ? chartColor : chartSecondaryColor,
+                      backgroundColor: isToday
+                        ? chartColor
+                        : chartSecondaryColor,
                       width: barWidth,
                       opacity: isToday ? 1 : 0.6,
                     },
                   ]}
                 />
               </View>
-              <Text style={[styles.label, {color: theme.colors.textSecondary}]}>
-                {chartLabels[index] || ''}
+              <Text
+                style={[styles.label, { color: theme.colors.textSecondary }]}
+              >
+                {chartLabels[index] || ""}
               </Text>
             </View>
           );
@@ -91,7 +100,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   strokeWidth = 2,
   showDots = true,
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const chartColor = color || theme.colors.primary;
   const max = maxValue !== undefined ? maxValue : Math.max(...data, 1);
   const min = minValue !== undefined ? minValue : Math.min(...data, 0);
@@ -100,15 +109,15 @@ export const LineChart: React.FC<LineChartProps> = ({
   const points = data.map((value, index) => {
     const x = (index / (data.length - 1 || 1)) * 100;
     const y = 100 - ((value - min) / range) * 100;
-    return {x, y, value};
+    return { x, y, value };
   });
 
   const pathD = points
     .map((point, index) => {
-      const command = index === 0 ? 'M' : 'L';
+      const command = index === 0 ? "M" : "L";
       return `${command} ${point.x} ${point.y}`;
     })
-    .join(' ');
+    .join(" ");
 
   return (
     <View style={[styles.lineChartContainer, style]}>
@@ -126,7 +135,7 @@ export const LineChart: React.FC<LineChartProps> = ({
             ]}
           />
         ))}
-        
+
         {/* SVG Line */}
         <View style={styles.svgContainer}>
           <View
@@ -154,13 +163,14 @@ export const LineChart: React.FC<LineChartProps> = ({
             ))}
         </View>
       </View>
-      
+
       {labels && (
         <View style={styles.labelsContainer}>
           {labels.map((label, index) => (
             <Text
               key={index}
-              style={[styles.axisLabel, {color: theme.colors.textSecondary}]}>
+              style={[styles.axisLabel, { color: theme.colors.textSecondary }]}
+            >
               {label}
             </Text>
           ))}
@@ -171,7 +181,7 @@ export const LineChart: React.FC<LineChartProps> = ({
 };
 
 interface PieChartProps {
-  data: {value: number; color: string; label?: string}[];
+  data: { value: number; color: string; label?: string }[];
   size?: number;
   style?: ViewStyle;
   showLegend?: boolean;
@@ -183,9 +193,9 @@ export const PieChart: React.FC<PieChartProps> = ({
   style,
   showLegend = false,
 }) => {
-  const {theme} = useTheme();
+  const { theme } = useTheme();
   const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
-  
+
   let currentAngle = 0;
   const segments = data.map((item) => {
     const angle = (item.value / total) * 360;
@@ -210,28 +220,28 @@ export const PieChart: React.FC<PieChartProps> = ({
             borderRadius: size / 2,
             backgroundColor: segments[0]?.color || theme.colors.primary,
           },
-        ]}>
+        ]}
+      >
         {/* Simple pie chart using conic gradient approximation */}
-        {segments.length > 1 && segments.map((segment, index) => {
-          if (index === 0) return null;
-          return (
-            <View
-              key={index}
-              style={[
-                styles.pieSegment,
-                {
-                  width: size,
-                  height: size,
-                  borderRadius: size / 2,
-                  backgroundColor: segment.color,
-                  transform: [
-                    {rotate: `${segment.startAngle}deg`},
-                  ],
-                },
-              ]}
-            />
-          );
-        })}
+        {segments.length > 1 &&
+          segments.map((segment, index) => {
+            if (index === 0) return null;
+            return (
+              <View
+                key={index}
+                style={[
+                  styles.pieSegment,
+                  {
+                    width: size,
+                    height: size,
+                    borderRadius: size / 2,
+                    backgroundColor: segment.color,
+                    transform: [{ rotate: `${segment.startAngle}deg` }],
+                  },
+                ]}
+              />
+            );
+          })}
         {/* Center hole for donut chart effect */}
         <View
           style={[
@@ -245,15 +255,15 @@ export const PieChart: React.FC<PieChartProps> = ({
           ]}
         />
       </View>
-      
+
       {showLegend && (
         <View style={styles.legend}>
           {segments.map((segment, index) => (
             <View key={index} style={styles.legendItem}>
               <View
-                style={[styles.legendColor, {backgroundColor: segment.color}]}
+                style={[styles.legendColor, { backgroundColor: segment.color }]}
               />
-              <Text style={[styles.legendText, {color: theme.colors.text}]}>
+              <Text style={[styles.legendText, { color: theme.colors.text }]}>
                 {segment.label} ({segment.percentage}%)
               </Text>
             </View>
@@ -266,23 +276,23 @@ export const PieChart: React.FC<PieChartProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    width: "100%",
   },
   chartContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
     height: 150,
     paddingTop: 20,
   },
   barWrapper: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
   barContainer: {
     height: 120,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   bar: {
     borderRadius: 4,
@@ -291,24 +301,24 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     marginTop: 8,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   valueLabel: {
     fontSize: 10,
     marginBottom: 4,
   },
-  
+
   // Line Chart Styles
   lineChartContainer: {
-    width: '100%',
+    width: "100%",
     height: 150,
   },
   lineChartInner: {
     flex: 1,
-    position: 'relative',
+    position: "relative",
   },
   gridLine: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     height: 1,
@@ -318,7 +328,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   linePath: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     top: 0,
@@ -329,7 +339,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0,
   },
   dot: {
-    position: 'absolute',
+    position: "absolute",
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -337,36 +347,36 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   labelsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingTop: 8,
   },
   axisLabel: {
     fontSize: 10,
   },
-  
+
   // Pie Chart Styles
   pieContainer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   pieChart: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
   },
   pieSegment: {
-    position: 'absolute',
+    position: "absolute",
   },
   pieCenter: {
-    position: 'absolute',
+    position: "absolute",
   },
   legend: {
     marginTop: 16,
-    width: '100%',
+    width: "100%",
   },
   legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   legendColor: {

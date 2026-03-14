@@ -1,4 +1,5 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { DEFAULT_BEDTIME_START, DEFAULT_BEDTIME_END } from "../../constants";
 
 interface SettingsState {
   darkMode: boolean;
@@ -6,7 +7,7 @@ interface SettingsState {
   soundEnabled: boolean;
   hapticEnabled: boolean;
   language: string;
-  privacyMode: 'public' | 'friends' | 'private';
+  privacyMode: "public" | "friends" | "private";
   bedtimeMode: {
     enabled: boolean;
     startTime: string;
@@ -19,17 +20,17 @@ const initialState: SettingsState = {
   notificationsEnabled: true,
   soundEnabled: true,
   hapticEnabled: true,
-  language: 'en',
-  privacyMode: 'friends',
+  language: "en",
+  privacyMode: "friends",
   bedtimeMode: {
     enabled: false,
-    startTime: '22:00',
-    endTime: '07:00',
+    startTime: DEFAULT_BEDTIME_START,
+    endTime: DEFAULT_BEDTIME_END,
   },
 };
 
 const settingsSlice = createSlice({
-  name: 'settings',
+  name: "settings",
   initialState,
   reducers: {
     toggleDarkMode: (state) => {
@@ -50,11 +51,17 @@ const settingsSlice = createSlice({
     setLanguage: (state, action: PayloadAction<string>) => {
       state.language = action.payload;
     },
-    setPrivacyMode: (state, action: PayloadAction<SettingsState['privacyMode']>) => {
+    setPrivacyMode: (
+      state,
+      action: PayloadAction<SettingsState["privacyMode"]>
+    ) => {
       state.privacyMode = action.payload;
     },
-    setBedtimeMode: (state, action: PayloadAction<Partial<SettingsState['bedtimeMode']>>) => {
-      state.bedtimeMode = {...state.bedtimeMode, ...action.payload};
+    setBedtimeMode: (
+      state,
+      action: PayloadAction<Partial<SettingsState["bedtimeMode"]>>
+    ) => {
+      state.bedtimeMode = { ...state.bedtimeMode, ...action.payload };
     },
     toggleBedtimeMode: (state) => {
       state.bedtimeMode.enabled = !state.bedtimeMode.enabled;

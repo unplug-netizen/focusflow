@@ -18,20 +18,20 @@ export interface AppUsage {
   category: AppCategory;
 }
 
-export type AppCategory = 
-  | 'social'
-  | 'entertainment'
-  | 'productivity'
-  | 'communication'
-  | 'games'
-  | 'shopping'
-  | 'other';
+export type AppCategory =
+  | "social"
+  | "entertainment"
+  | "productivity"
+  | "communication"
+  | "games"
+  | "shopping"
+  | "other";
 
 export interface BlockRule {
   id: string;
   packageName: string;
   appName: string;
-  type: 'schedule' | 'limit' | 'permanent';
+  type: "schedule" | "limit" | "permanent";
   schedule?: {
     startTime: string; // HH:mm
     endTime: string;
@@ -47,7 +47,7 @@ export interface FocusSession {
   startTime: Date;
   endTime?: Date;
   duration: number; // in minutes
-  type: 'pomodoro' | 'deep_work' | 'custom';
+  type: "pomodoro" | "deep_work" | "custom";
   completed: boolean;
   interruptions: number;
 }
@@ -57,7 +57,7 @@ export interface Badge {
   name: string;
   description: string;
   icon: string;
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  tier: "bronze" | "silver" | "gold" | "platinum";
   unlockedAt?: Date;
   progress: number;
   maxProgress: number;
@@ -85,18 +85,18 @@ export interface LeaderboardEntry {
   isCurrentUser: boolean;
 }
 
-export type LeaderboardCategory = 
-  | 'screen_time'
-  | 'focus_time'
-  | 'badges'
-  | 'streak'
-  | 'weekly_challenge';
+export type LeaderboardCategory =
+  | "screen_time"
+  | "focus_time"
+  | "badges"
+  | "streak"
+  | "weekly_challenge";
 
 export interface Challenge {
   id: string;
   title: string;
   description: string;
-  type: 'daily' | 'weekly' | 'special';
+  type: "daily" | "weekly" | "special";
   startDate: Date;
   endDate: Date;
   reward: number; // Focus Coins
@@ -120,13 +120,13 @@ export interface Theme {
   };
 }
 
-export type TimerStatus = 'idle' | 'running' | 'paused' | 'completed';
+export type TimerStatus = "idle" | "running" | "paused" | "completed";
 
 export interface TimerState {
   status: TimerStatus;
   timeRemaining: number; // in seconds
   totalTime: number;
-  mode: 'pomodoro' | 'shortBreak' | 'longBreak';
+  mode: "pomodoro" | "shortBreak" | "longBreak";
   currentSession: number;
   totalSessions: number;
 }

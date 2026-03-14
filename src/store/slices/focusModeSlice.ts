@@ -1,5 +1,11 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {TimerState, FocusSession} from '../../types';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { TimerState, FocusSession } from "../../types";
+import {
+  POMODORO_DURATION,
+  SHORT_BREAK_DURATION,
+  LONG_BREAK_DURATION,
+  DEFAULT_SESSIONS_COUNT,
+} from "../../constants";
 
 interface FocusModeState {
   timer: TimerState;
@@ -11,59 +17,59 @@ interface FocusModeState {
 
 const initialState: FocusModeState = {
   timer: {
-    status: 'idle',
-    timeRemaining: 25 * 60, // 25 minutes in seconds
-    totalTime: 25 * 60,
-    mode: 'pomodoro',
+    status: "idle",
+    timeRemaining: POMODORO_DURATION * 60,
+    totalTime: POMODORO_DURATION * 60,
+    mode: "pomodoro",
     currentSession: 1,
-    totalSessions: 4,
+    totalSessions: DEFAULT_SESSIONS_COUNT,
   },
   sessions: [],
   soundEnabled: true,
-  selectedSound: 'rain',
+  selectedSound: "rain",
   notificationsBlocked: false,
 };
 
 const focusModeSlice = createSlice({
-  name: 'focusMode',
+  name: "focusMode",
   initialState,
   reducers: {
     startTimer: (state) => {
-      state.timer.status = 'running';
+      state.timer.status = "running";
     },
     pauseTimer: (state) => {
-      state.timer.status = 'paused';
+      state.timer.status = "paused";
     },
     resumeTimer: (state) => {
-      state.timer.status = 'running';
+      state.timer.status = "running";
     },
     stopTimer: (state) => {
-      state.timer.status = 'idle';
+      state.timer.status = "idle";
       state.timer.timeRemaining = state.timer.totalTime;
     },
     tick: (state) => {
-      if (state.timer.status === 'running' && state.timer.timeRemaining > 0) {
+      if (state.timer.status === "running" && state.timer.timeRemaining > 0) {
         state.timer.timeRemaining -= 1;
       }
       if (state.timer.timeRemaining === 0) {
-        state.timer.status = 'completed';
+        state.timer.status = "completed";
       }
     },
-    setTimerMode: (state, action: PayloadAction<TimerState['mode']>) => {
+    setTimerMode: (state, action: PayloadAction<TimerState["mode"]>) => {
       state.timer.mode = action.payload;
       switch (action.payload) {
-        case 'pomodoro':
-          state.timer.totalTime = 25 * 60;
+        case "pomodoro":
+          state.timer.totalTime = POMODORO_DURATION * 60;
           break;
-        case 'shortBreak':
-          state.timer.totalTime = 5 * 60;
+        case "shortBreak":
+          state.timer.totalTime = SHORT_BREAK_DURATION * 60;
           break;
-        case 'longBreak':
-          state.timer.totalTime = 15 * 60;
+        case "longBreak":
+          state.timer.totalTime = LONG_BREAK_DURATION * 60;
           break;
       }
       state.timer.timeRemaining = state.timer.totalTime;
-      state.timer.status = 'idle';
+      state.timer.status = "idle";
     },
     setCustomTime: (state, action: PayloadAction<number>) => {
       state.timer.totalTime = action.payload * 60;

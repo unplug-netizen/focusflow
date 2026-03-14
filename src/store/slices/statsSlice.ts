@@ -1,5 +1,11 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {UserStats, Badge} from '../../types';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { UserStats, Badge } from "../../types";
+import {
+  WEEKLY_STREAK_COINS,
+  MONTHLY_STREAK_COINS,
+  STREAK_WEEK_DAYS,
+  STREAK_MONTH_DAYS,
+} from "../../constants";
 
 const initialState: UserStats = {
   totalFocusTime: 0,
@@ -15,81 +21,81 @@ const initialState: UserStats = {
 
 const defaultBadges: Badge[] = [
   {
-    id: 'streak_7',
-    name: 'Week Warrior',
-    description: '7 days without blocked apps',
-    icon: '🔥',
-    tier: 'bronze',
+    id: "streak_7",
+    name: "Week Warrior",
+    description: "7 days without blocked apps",
+    icon: "🔥",
+    tier: "bronze",
+    progress: 0,
+    maxProgress: STREAK_WEEK_DAYS,
+  },
+  {
+    id: "streak_30",
+    name: "Month Master",
+    description: "30 days without blocked apps",
+    icon: "🔥",
+    tier: "silver",
+    progress: 0,
+    maxProgress: STREAK_MONTH_DAYS,
+  },
+  {
+    id: "social_detox_7",
+    name: "Social Detox",
+    description: "1 week without social media",
+    icon: "🏆",
+    tier: "silver",
     progress: 0,
     maxProgress: 7,
   },
   {
-    id: 'streak_30',
-    name: 'Month Master',
-    description: '30 days without blocked apps',
-    icon: '🔥',
-    tier: 'silver',
-    progress: 0,
-    maxProgress: 30,
-  },
-  {
-    id: 'social_detox_7',
-    name: 'Social Detox',
-    description: '1 week without social media',
-    icon: '🏆',
-    tier: 'silver',
-    progress: 0,
-    maxProgress: 7,
-  },
-  {
-    id: 'digital_sabbath',
-    name: 'Digital Sabbath',
-    description: '24 hours completely offline',
-    icon: '📵',
-    tier: 'gold',
+    id: "digital_sabbath",
+    name: "Digital Sabbath",
+    description: "24 hours completely offline",
+    icon: "📵",
+    tier: "gold",
     progress: 0,
     maxProgress: 1,
   },
   {
-    id: 'sleep_champion',
-    name: 'Sleep Champion',
-    description: '30 days bedtime mode maintained',
-    icon: '🌙',
-    tier: 'gold',
+    id: "sleep_champion",
+    name: "Sleep Champion",
+    description: "30 days bedtime mode maintained",
+    icon: "🌙",
+    tier: "gold",
     progress: 0,
     maxProgress: 30,
   },
   {
-    id: 'focus_king',
-    name: 'Focus King',
-    description: '100 hours Focus Mode used',
-    icon: '🎯',
-    tier: 'platinum',
+    id: "focus_king",
+    name: "Focus King",
+    description: "100 hours Focus Mode used",
+    icon: "🎯",
+    tier: "platinum",
     progress: 0,
     maxProgress: 6000, // 100 hours in minutes
   },
   {
-    id: 'early_bird',
-    name: 'Early Bird',
-    description: 'No social media before 8 AM',
-    icon: '🥇',
-    tier: 'bronze',
+    id: "early_bird",
+    name: "Early Bird",
+    description: "No social media before 8 AM",
+    icon: "🥇",
+    tier: "bronze",
     progress: 0,
     maxProgress: 7,
   },
   {
-    id: 'weekend_warrior',
-    name: 'Weekend Warrior',
-    description: 'Complete weekend without mobile games',
-    icon: '💪',
-    tier: 'silver',
+    id: "weekend_warrior",
+    name: "Weekend Warrior",
+    description: "Complete weekend without mobile games",
+    icon: "💪",
+    tier: "silver",
     progress: 0,
     maxProgress: 1,
   },
 ];
 
 const statsSlice = createSlice({
-  name: 'stats',
+  name: "stats",
   initialState: {
     ...initialState,
     badges: defaultBadges,
@@ -97,11 +103,14 @@ const statsSlice = createSlice({
   reducers: {
     addFocusTime: (state, action: PayloadAction<number>) => {
       state.totalFocusTime += action.payload;
-      
+
       // Update Focus King badge
-      const focusKing = state.badges.find(b => b.id === 'focus_king');
+      const focusKing = state.badges.find((b) => b.id === "focus_king");
       if (focusKing && !focusKing.unlockedAt) {
-        focusKing.progress = Math.min(focusKing.progress + action.payload, focusKing.maxProgress);
+        focusKing.progress = Math.min(
+          focusKing.progress + action.payload,
+          focusKing.maxProgress
+        );
         if (focusKing.progress >= focusKing.maxProgress) {
           focusKing.unlockedAt = new Date();
         }
@@ -116,24 +125,30 @@ const statsSlice = createSlice({
       if (state.currentStreak > state.longestStreak) {
         state.longestStreak = state.currentStreak;
       }
-      
+
       // Update streak badges
-      const weekWarrior = state.badges.find(b => b.id === 'streak_7');
-      const monthMaster = state.badges.find(b => b.id === 'streak_30');
-      
+      const weekWarrior = state.badges.find((b) => b.id === "streak_7");
+      const monthMaster = state.badges.find((b) => b.id === "streak_30");
+
       if (weekWarrior && !weekWarrior.unlockedAt) {
-        weekWarrior.progress = Math.min(state.currentStreak, weekWarrior.maxProgress);
+        weekWarrior.progress = Math.min(
+          state.currentStreak,
+          weekWarrior.maxProgress
+        );
         if (weekWarrior.progress >= weekWarrior.maxProgress) {
           weekWarrior.unlockedAt = new Date();
-          state.focusCoins += 50;
+          state.focusCoins += WEEKLY_STREAK_COINS;
         }
       }
-      
+
       if (monthMaster && !monthMaster.unlockedAt) {
-        monthMaster.progress = Math.min(state.currentStreak, monthMaster.maxProgress);
+        monthMaster.progress = Math.min(
+          state.currentStreak,
+          monthMaster.maxProgress
+        );
         if (monthMaster.progress >= monthMaster.maxProgress) {
           monthMaster.unlockedAt = new Date();
-          state.focusCoins += 200;
+          state.focusCoins += MONTHLY_STREAK_COINS;
         }
       }
     },
@@ -151,14 +166,17 @@ const statsSlice = createSlice({
       state.dailyAverage = action.payload.reduce((a, b) => a + b, 0) / 7;
     },
     unlockBadge: (state, action: PayloadAction<string>) => {
-      const badge = state.badges.find(b => b.id === action.payload);
+      const badge = state.badges.find((b) => b.id === action.payload);
       if (badge && !badge.unlockedAt) {
         badge.unlockedAt = new Date();
         badge.progress = badge.maxProgress;
       }
     },
-    updateBadgeProgress: (state, action: PayloadAction<{id: string; progress: number}>) => {
-      const badge = state.badges.find(b => b.id === action.payload.id);
+    updateBadgeProgress: (
+      state,
+      action: PayloadAction<{ id: string; progress: number }>
+    ) => {
+      const badge = state.badges.find((b) => b.id === action.payload.id);
       if (badge && !badge.unlockedAt) {
         badge.progress = Math.min(action.payload.progress, badge.maxProgress);
         if (badge.progress >= badge.maxProgress) {
