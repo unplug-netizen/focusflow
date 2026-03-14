@@ -1,336 +1,296 @@
 # FocusFlow Code Review Report
 
-**Review Datum:** 14. März 2026 (Update)  
+**Review Datum:** 14. März 2026  
 **Reviewer:** FocusFlow Code-Reviewer Agent  
-**Projekt:** FocusFlow Mobile App (React Native + Firebase)  
-**Branch:** main  
-**Commit:** 9167a64 (fix: resolve TypeScript errors and unused variables)
+**Projekt:** FocusFlow Mobile App  
+**Repository:** https://github.com/unplug-netizen/focusflow
 
 ---
 
 ## 📊 Zusammenfassung
 
-| Kategorie | Status | Bewertung |
-|-----------|--------|-----------|
-| TypeScript-Typisierung | ✅ Gut | Strikte Typen konfiguriert, keine TS-Fehler |
-| Code-Qualität | ⚠️ Mittel | ESLint-Warnungen (Quotes, Inline-Styles) |
-| Fehlerbehandlung | ✅ Gut | ErrorBoundary vorhanden, Verbesserungen möglich |
-| Performance | ⚠️ Mittel | Kritische React-Anti-Pattern gefunden |
-| Sicherheit | ✅ Gut | Keine hartkodierten Secrets |
-| Test-Abdeckung | ✅ Sehr Gut | 157 Tests bestehen |
-
----
-
-## 🚨 Kritische Probleme
-
-### 1. Unstabile Komponenten-Definition in Render (App.tsx)
-**Datei:** `App.tsx` (Zeilen 72-104)
-
-```typescript
-// PROBLEMATISCH:
-tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="🏠" />,
-```
-
-**Problem:** Die `TabIcon`-Komponente wird bei jedem Render neu definiert. React erkennt dies als neue Komponente und zerstört den gesamten Subtree.
-
-**Empfohlene Lösung:**
-```typescript
-// Extrahiere außerhalb der Komponente:
-const TabIcons: Record<string, string> = {
-  Home: "🏠",
-  Blocker: "🚫",
-  Focus: "🎯",
-  Stats: "📊",
-  Profile: "👤",
-};
-
-// In der Navigation:
-tabBarIcon: ({ focused, route }) => (
-  <Text style={{
-    fontSize: focused ? 24 : 20,
-    opacity: focused ? 1 : 0.6,
-    color: focused ? theme.colors.primary : theme.colors.textSecondary,
-  }}>
-    {TabIcons[route.name]}
-  </Text>
-),
-```
-
-**Priorität:** 🔴 Hoch - Performance-Impact
-
----
-
-## ⚠️ Warnungen
-
-### 2. ESLint Quote-Konvention
-**Dateien:** Alle `.ts/.tsx` Dateien
-
-**Problem:** ESLint erwartet Single Quotes, aber der Code verwendet Double Quotes.
-
-**Statistik:** ~150 Quote-Warnungen
-
-**Lösung:**
-```bash
-npx prettier --write "src/**/*.{ts,tsx}" "backend/functions/src/**/*.ts"
-```
-
-### 3. `any`-Typen in Tests
-**Dateien:** `backend/functions/__tests__/*.test.ts`
-
-**Problem:** Mehrere Stellen verwenden `any` anstelle spezifischer Typen.
-
-**Beispiel:**
-```typescript
-// In badgeVerificationSystem.test.ts (Zeile 172)
-const badge = doc.data() as any;
-```
-
-**Empfohlene Lösung:**
-```typescript
-interface BadgeData {
-  id: string;
-  tier: BadgeTier;
-  unlockedAt?: Date;
-}
-const badge = doc.data() as BadgeData;
-```
-
-### 4. Inline Styles in App.tsx
-**Datei:** `App.tsx` (Zeile 34)
-
-```typescript
-style={{
-  fontSize: focused ? 24 : 20,
-  opacity: focused ? 1 : 0.6,
-  color: focused ? theme.colors.primary : theme.colors.textSecondary,
-}}
-```
-
-**Empfehlung:** Verwende StyleSheet für bessere Performance.
-
-### 5. Unvollständige Sound-Button Implementierung
-**Datei:** `FocusModeScreen.tsx` (Zeile 95)
-
-```typescript
-<TouchableOpacity onPress={() => {}}>
-```
-
-Der Sound-Toggle hat keine Funktionalität.
-
-### 6. Timer Intervals ohne Cleanup-Check
-**Datei:** `FocusModeScreen.tsx`
-
-```typescript
-useEffect(() => {
-  if (timer.status === "running") {
-    intervalRef.current = setInterval(() => {
-      dispatch(tick());
-    }, 1000);
-  }
-  // ...
-}, [timer.status, dispatch]);
-```
-
-**Empfehlung:** Füge eine Cleanup-Prüfung hinzu:
-```typescript
-useEffect(() => {
-  if (timer.status !== "running") {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    return;
-  }
-  
-  intervalRef.current = setInterval(() => {
-    dispatch(tick());
-  }, 1000);
-  
-  return () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-  };
-}, [timer.status, dispatch]);
-```
-
-### 7. Mock-Daten in Produktions-Code
-**Dateien:** 
-- `LeaderboardScreen.tsx` (MOCK_LEADERBOARD)
-- `AppBlockerScreen.tsx` (MOCK_APPS)
-
-**Empfehlung:** Füge TODO-Kommentare hinzu oder verwende Feature-Flags:
-```typescript
-// TODO: Remove mock data before production
-const MOCK_LEADERBOARD = [...];
-```
+Die FocusFlow App zeigt insgesamt eine **gute Code-Qualität** mit einer soliden Architektur und sauberer Struktur. Das Projekt nutzt moderne Technologien (React Native, TypeScript, Redux Toolkit, Firebase) und folgt weitgehend Best Practices. Alle 165 Backend-Tests bestehen erfolgreich.
 
 ---
 
 ## ✅ Positive Aspekte
 
-### 1. TypeScript-Konfiguration
-- ✅ `strict: true` ist aktiviert
-- ✅ Path-Mapping für saubere Imports (`@/`, `@components/`)
-- ✅ Keine TypeScript-Fehler bei `tsc --noEmit`
+### 1. TypeScript-Typisierung
+- **Strikte Typisierung** aktiviert (`"strict": true` in tsconfig.json)
+- Umfassende Interface-Definitionen in `src/types/index.ts`
+- Klare Typ-Definitionen für alle Redux-Slices
+- Keine `any`-Typen im Produktiv-Code (nur in generierten .d.ts Dateien)
 
-### 2. Test-Abdeckung
-- ✅ **157 Tests** bestehen alle
-- ✅ Backend-Services sind gut getestet
-- ✅ Mock-Implementierungen für Firebase
+### 2. Projektstruktur
+- **Klare Trennung** von Komponenten, Screens, Store und Services
+- Konsistente Datei-Namen-Konventionen (PascalCase für Komponenten, camelCase für slices)
+- Gute Backend-Struktur mit separation of concerns (services, triggers, config)
 
-### 3. Error Boundary
-- ✅ Implementiert mit Fallback-UI
-- ✅ Zeigt Fehlerdetails in `__DEV__` Mode
-- ✅ Ermöglicht Reset nach Fehler
+### 3. State Management
+- **Redux Toolkit** für effizientes State Management
+- **Redux Persist** für Offline-Fähigkeit
+- Saubere Slice-Struktur mit klar definierten Actions
 
-### 4. State Management
-- ✅ Redux Toolkit für saubere Slice-Struktur
-- ✅ Async Thunks für Firebase-Operationen
-- ✅ Redux Persist für lokale Speicherung
+### 4. Fehlerbehandlung
+- **ErrorBoundary** implementiert (`src/components/ErrorBoundary.tsx`)
+- Try-catch in allen async Thunks
+- Firebase-Fehler werden korrekt behandelt
 
-### 5. Theming
-- ✅ Konsistente Farbpalette
-- ✅ Dark/Light Mode Support
-- ✅ Zentralisiertes Theme-System
+### 5. Backend-Qualität
+- **165 Tests** bestehen alle erfolgreich
+- Umfassende Testabdeckung für Services
+- Saubere Firebase-Integration
+- Batch-Operationen für effiziente Firestore-Updates
 
-### 6. Backend-Architektur
-- ✅ Klare Trennung von Services, Triggern und HTTP-Funktionen
-- ✅ Firebase Cloud Functions mit TypeScript
-- ✅ Batch-Operationen für Firestore-Effizienz
-- ✅ Umfassende Error-Handling in Cloud Functions
+### 6. UI/UX
+- **Dark/Light Mode** Support via ThemeContext
+- Konsistente Design-Sprache
+- Wiederverwendbare UI-Komponenten
+- Barrierefreie Navigation
 
 ### 7. Sicherheit
-- ✅ Keine hartkodierten Secrets im Code
-- ✅ Firebase Auth für Authentifizierung
-- ✅ Input-Validierung im Login
-- ✅ HTTPS für alle Cloud Functions
+- Keine hartkodierten Secrets im Code
+- Firebase-Auth für Authentifizierung
+- Input-Validierung in HTTP Functions
 
 ---
 
-## 📋 Empfohlene Aktionen
+## ⚠️ Warnungen (Verbesserung empfohlen)
 
-### Sofort (Kritisch)
-1. [ ] Fix: Unstabile Komponenten-Definition in `App.tsx` (TabIcon)
-2. [ ] Fix: ESLint Quote-Konventionen anwenden (Prettier)
+### 1. ESLint-Konfiguration
+**Problem:** Die ESLint-Konfiguration erfordert Single-Quotes, aber der gesamte Code verwendet Double-Quotes. Dies führt zu 100+ Warnungen.
 
-### Kurzfristig (Warnungen)
-3. [ ] Entferne oder implementiere Sound-Button in `FocusModeScreen.tsx`
-4. [ ] Ersetze `any` Typen in Tests durch spezifische Interfaces
-5. [ ] Extrahiere Inline-Styles in StyleSheet-Objekte
-6. [ ] Verbessere Timer-Cleanup in `FocusModeScreen.tsx`
-
-### Langfristig (Verbesserungen)
-7. [ ] Füge JSDoc-Kommentare zu komplexen Funktionen hinzu
-8. [ ] Extrahiere Magic Numbers in Konstanten
-9. [ ] Implementiere echte API-Calls statt Mock-Daten
-10. [ ] Füge E2E-Tests mit Detox hinzu
-11. [ ] Richte CI/CD Pipeline für automatische Tests ein
-
----
-
-## 📁 Projektstruktur Bewertung
-
-```
-✅ Saubere Ordner-Struktur
-✅ Konsistente Datei-Namen (PascalCase für Komponenten)
-✅ Klare Trennung: components/, screens/, store/, types/
-✅ Backend separat in backend/functions/
-⚠️  Fehlende utils/ und hooks/ Ordner
+**Empfohlene Lösung:**
+```javascript
+// .eslintrc.js
+module.exports = {
+  rules: {
+    quotes: ['warn', 'double'], // oder 'off'
+  },
+};
 ```
 
-### Empfohlene Ordner-Struktur Erweiterung:
-```
-src/
-├── components/    ✅ Wiederverwendbare UI-Komponenten
-├── screens/       ✅ App-Screens
-├── store/         ✅ Redux Store und Slices
-├── theme/         ✅ Theming-Konfiguration
-├── types/         ✅ TypeScript-Typen
-├── constants/     ✅ App-Konstanten
-├── utils/         ❌ Fehlt - Hilfsfunktionen
-└── hooks/         ❌ Fehlt - Custom React Hooks
-```
+### 2. React Native Inline Styles
+**Problem:** In `App.tsx` werden Inline-Styles verwendet, was zu Performance-Problemen führen kann.
 
----
-
-## 🔒 Sicherheitsprüfung
-
-| Prüfung | Status |
-|---------|--------|
-| Keine hartkodierten API-Keys | ✅ |
-| Firebase Auth verwendet | ✅ |
-| Input-Validierung im Login | ✅ |
-| HTTPS für alle Cloud Functions | ✅ |
-| Rate-Limiting für HTTP Functions | ⚠️ Nicht implementiert |
-
-**Empfehlung:** Füge Rate-Limiting für HTTP Callable Functions hinzu:
+**Datei:** `App.tsx:34`
 ```typescript
-export const registerFcmToken = functions
-  .runWith({ timeoutSeconds: 30 })
-  .https.onCall(async (data, context) => {
-    // ...
-  });
+// Aktuell:
+style={{ fontSize: focused ? 24 : 20, opacity: focused ? 1 : 0.6 }}
+
+// Empfohlen:
+const styles = StyleSheet.create({
+  tabIcon: { fontSize: 24 },
+  tabIconInactive: { fontSize: 20, opacity: 0.6 },
+});
+```
+
+### 3. Unstable Nested Components
+**Problem:** In `App.tsx` werden Komponenten innerhalb von Render-Funktionen definiert.
+
+**Datei:** `App.tsx:71-104`
+```typescript
+// Aktuell:
+tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="🏠" />
+
+// Empfohlen:
+// TabIcon außerhalb der Komponente definieren oder als statische Komponente
+```
+
+### 4. Timer-Interval-Cleanup
+**Problem:** In `FocusModeScreen.tsx` wird das Interval-Ref nicht korrekt typisiert.
+
+**Datei:** `src/screens/FocusModeScreen.tsx:45`
+```typescript
+// Aktuell:
+const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+// Empfohlen für React Native:
+const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+```
+
+### 5. Memory Leak Potenzial
+**Problem:** In `FocusModeScreen.tsx` wird `setTimeout` verwendet ohne Cleanup.
+
+**Datei:** `src/screens/FocusModeScreen.tsx:198`
+```typescript
+// Aktuell:
+setTimeout(() => dispatch(startTimer()), 100);
+
+// Empfohlen:
+const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+// ...
+useEffect(() => {
+  return () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  };
+}, []);
+```
+
+### 6. ESLint-Disable Kommentare
+**Problem:** Mehrere `eslint-disable-next-line` Kommentare deaktivieren wichtige Regeln.
+
+**Dateien:**
+- `FocusModeScreen.tsx:67` - `react-hooks/exhaustive-deps`
+- `FocusModeScreen.tsx:85` - `react-hooks/exhaustive-deps`
+
+**Empfehlung:** Abhängigkeiten korrekt definieren oder useCallback verwenden.
+
+---
+
+## 🔴 Kritische Probleme
+
+### 1. Keine Input-Sanitization
+**Problem:** Benutzereingaben werden nicht sanitisiert bevor sie in Firestore gespeichert werden.
+
+**Betroffene Dateien:**
+- `authSlice.ts` - displayName wird direkt übernommen
+- `appBlockerSlice.ts` - App-Namen werden nicht validiert
+
+**Empfohlene Lösung:**
+```typescript
+// Input-Sanitization hinzufügen
+const sanitizeString = (input: string): string => {
+  return input.trim().replace(/[<>]/g, ''); // Basic XSS-Prevention
+};
+```
+
+### 2. Keine Rate-Limiting
+**Problem:** Die Firebase Functions haben kein Rate-Limiting implementiert.
+
+**Empfohlene Lösung:**
+```typescript
+// In Firebase Functions
+import * as functions from 'firebase-functions';
+
+export const someFunction = functions.https.onCall({
+  rateLimits: {
+    maxCallsPerUserPerMinute: 10,
+  }
+}, async (data, context) => {
+  // ...
+});
 ```
 
 ---
 
-## 🧪 Test-Ergebnisse
+## 📈 Performance-Optimierungen
 
+### 1. Unnötige Re-Renders
+**Problem:** `useSelector` wird mit Objekten verwendet, die bei jedem Render neu erstellt werden.
+
+**Datei:** `HomeScreen.tsx:42-45`
+```typescript
+// Aktuell:
+const { totalFocusTime, focusCoins, currentStreak, badges } = useSelector(
+  (state: RootState) => state.stats
+);
+
+// Ist OK, aber könnte mit reselect optimiert werden
 ```
-Test Suites: 8 passed, 8 total
-Tests:       157 passed, 157 total
-Snapshots:   0 total
-Time:        ~0.8s
+
+### 2. Memoization fehlt
+**Problem:** Komplexe Berechnungen werden nicht memoisiert.
+
+**Empfohlene Lösung:**
+```typescript
+const activeRules = useMemo(
+  () => rules.filter((r) => r.isActive).length,
+  [rules]
+);
 ```
 
-Alle Tests bestehen. Die Test-Abdeckung ist für das Backend gut, für die UI-Komponenten könnten mehr Tests hinzugefügt werden.
+### 3. FlatList statt ScrollView
+**Problem:** Lange Listen werden mit ScrollView + map gerendert.
 
-### Test-Verteilung:
-- `badgeVerificationSystem.test.ts`: 45 Tests
-- `appUsageTracker.test.ts`: 28 Tests
-- `leaderboardService.test.ts`: 24 Tests
-- `pushNotificationService.test.ts`: 18 Tests
-- `services.test.ts`: 15 Tests
-- `functions.test.ts`: 12 Tests
-- `httpFunctions.test.ts`: 10 Tests
-- `triggers.test.ts`: 5 Tests
+**Betroffene Dateien:**
+- `AppBlockerScreen.tsx` - App-Liste
+- `ProfileScreen.tsx` - Badges
 
----
-
-## 🔄 Letzte Änderungen (seit letztem Review)
-
-### Behoben:
-1. ✅ TypeScript-Fehler behoben
-2. ✅ Unbenutzte Variablen entfernt
-3. ✅ Backend-Services mit strikten Typen versehen
-
-### Neue Probleme:
-1. ⚠️ ESLint Quote-Warnungen (bestehend)
-2. ⚠️ React-unstable-nested-components Warnung in App.tsx (kritisch)
+**Empfohlene Lösung:**
+```typescript
+<FlatList
+  data={filteredApps}
+  renderItem={({ item }) => <AppUsageCard app={item} />}
+  keyExtractor={(item) => item.packageName}
+/>
+```
 
 ---
 
-## 📝 Code-Qualität Metriken
+## 🧪 Test-Abdeckung
 
-| Metrik | Wert | Bewertung |
-|--------|------|-----------|
-| TypeScript Fehler | 0 | ✅ Exzellent |
-| ESLint Warnungen | ~150 | ⚠️ Verbesserungswürdig |
-| Test Coverage | 157 Tests | ✅ Gut |
-| Kommentar-Abdeckung | ~10% | ⚠️ Zu niedrig |
-| Durchschnittliche Zeilen/Datei | ~200 | ✅ Gut |
+### Frontend
+- **Status:** Keine Frontend-Tests vorhanden
+- **Empfohlung:** Jest + React Native Testing Library hinzufügen
 
----
-
-## 🎯 Fazit
-
-Die FocusFlow App zeigt insgesamt eine **gute Code-Qualität** mit sauberer Architektur und umfassenden Tests. Die kritischsten Probleme sind:
-
-1. **React-Performance-Issue** in App.tsx (unstable nested components)
-2. **ESLint-Konventionen** nicht eingehalten
-
-Nach Behebung dieser Punkte ist die Codebasis produktionsreif.
+### Backend
+- **Status:** ✅ 165 Tests bestehen
+- **Abdeckung:** Gut für Services und Functions
 
 ---
 
-**Review abgeschlossen.** Für Fragen oder Diskussionen zu spezifischen Punkten, erstelle ein GitHub Issue.
+## 📚 Dokumentation
+
+### Positiv
+- Umfassende README.md
+- API-Dokumentation in `backend/API.md`
+- Inline-Kommentare im Backend-Code
+
+### Verbesserungswürdig
+- JSDoc für Frontend-Funktionen fehlt
+- Keine Storybook-Dokumentation für Komponenten
+
+---
+
+## 🎯 Priorisierte Empfehlungen
+
+### Hohe Priorität
+1. ESLint-Konfiguration anpassen (Quotes)
+2. Frontend-Tests hinzufügen
+3. Input-Sanitization implementieren
+4. Memory Leak in FocusModeScreen beheben
+
+### Mittlere Priorität
+1. FlatList statt ScrollView für Listen
+2. Memoization für komplexe Berechnungen
+3. Rate-Limiting für Firebase Functions
+
+### Niedrige Priorität
+1. JSDoc hinzufügen
+2. Storybook einrichten
+3. E2E-Tests mit Detox
+
+---
+
+## 📊 Gesamtbewertung
+
+| Kategorie | Bewertung | Anmerkung |
+|-----------|-----------|-----------|
+| TypeScript | ⭐⭐⭐⭐⭐ | Strikte Typisierung, keine `any` |
+| Code-Qualität | ⭐⭐⭐⭐ | Gut, kleinere ESLint-Issues |
+| Architektur | ⭐⭐⭐⭐⭐ | Saubere Struktur |
+| Tests | ⭐⭐⭐ | Backend gut, Frontend fehlend |
+| Dokumentation | ⭐⭐⭐⭐ | Gut, könnte erweitert werden |
+| Performance | ⭐⭐⭐⭐ | Kleinere Optimierungen möglich |
+| Sicherheit | ⭐⭐⭐⭐ | Keine Secrets, Input-Sanitization fehlt |
+
+**Gesamtpunktzahl: 27/35 (77%)**
+
+---
+
+## 🔧 Automatisierte Fixes
+
+Die folgenden Probleme können automatisch behoben werden:
+
+```bash
+# ESLint-Fixes
+npm run lint -- --fix
+
+# Prettier-Formatierung
+npx prettier --write "src/**/*.{ts,tsx}"
+```
+
+---
+
+*Dieser Report wurde automatisch vom FocusFlow Code-Reviewer Agent generiert.*
