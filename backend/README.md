@@ -5,40 +5,45 @@ Firebase Cloud Functions Backend für die FocusFlow App.
 ## Features
 
 ### Services
-
-- **AppUsageTracker**: Verfolgt und aggregiert App-Nutzungsdaten
-- **LeaderboardService**: Verwaltet Ranglisten für verschiedene Kategorien
-- **PushNotificationService**: Sendet Push-Benachrichtigungen via FCM
-- **BadgeVerificationSystem**: Überprüft und vergibt Badges
+- **LeaderboardService** - Ranglisten-Verwaltung mit 5 Kategorien
+- **PushNotificationService** - FCM Push-Benachrichtigungen
+- **AppUsageTracker** - App-Nutzungs-Tracking und Statistiken
+- **BadgeVerificationSystem** - Badge-Freischaltung und -Verifikation
+- **AnalyticsService** - Detaillierte Analytics und Einblicke
+- **ChallengeService** - Wöchentliche Challenges und Belohnungen
 
 ### Cloud Functions
 
 #### Firestore Triggers
 - `onUserStatsUpdate` - Aktualisiert Ranglisten bei Statistik-Änderungen
-- `onFocusSessionComplete` - Verarbeitet abgeschlossene Fokus-Sessions
+- `onFocusSessionComplete` - Verarbeitet abgeschlossene Fokus-Sitzungen
 - `onDailyStatsUpdate` - Aktualisiert tägliche Statistiken
 - `onUserCreate` - Initialisiert neue Benutzer
-- `onBlockedAttempt` - Verarbeitet blockierte App-Versuche
+- `onBlockedAttempt` - Verarbeitet blockierte App-Zugriffe
 
 #### Scheduled Functions
 - `dailySummaryNotification` - Tägliche Zusammenfassung (21:00)
 - `streakReminderCheck` - Streak-Erinnerungen (20:00)
-- `dailyLeaderboardUpdate` - Ranglisten-Update (00:00)
-- `weeklyChallengeReset` - Wöchentliche Challenge-Reset (Montag 00:00)
+- `dailyLeaderboardUpdate` - Tägliche Ranglisten-Aktualisierung (00:00)
+- `weeklyChallengeReset` - Wöchentliche Challenge-Rücksetzung (Montag 00:00)
 - `cleanupOldLogs` - Bereinigung alter Logs (02:00)
-- `processQueuedNotifications` - Verarbeitet wartende Benachrichtigungen
-- `dailyBadgeCheck` - Überprüft Badge-Fortschritt (06:00)
+- `processQueuedNotifications` - Verarbeitung wartender Benachrichtigungen
+- `dailyBadgeCheck` - Tägliche Badge-Überprüfung (06:00)
 
 #### HTTP Callable Functions
-- `registerFcmToken` - Registriert FCM-Token
-- `unregisterFcmToken` - Entfernt FCM-Token
-- `getLeaderboard` - Ruft Rangliste ab
-- `logAppUsage` - Protokolliert App-Nutzung
-- `getUserBadges` - Ruft Benutzer-Badges ab
-- `checkBadges` - Überprüft Badge-Berechtigung
-- `subscribeToTopic` / `unsubscribeFromTopic` - Topic-Verwaltung
-- `updateNotificationPreferences` - Aktualisiert Benachrichtigungseinstellungen
-- `getDailyStats` / `getWeeklyStats` - Ruft Statistiken ab
+- `registerFcmToken` / `unregisterFcmToken` - FCM Token-Verwaltung
+- `getLeaderboard` - Rangliste abrufen
+- `logAppUsage` - App-Nutzung protokollieren
+- `getUserBadges` / `checkBadges` - Badge-Verwaltung
+- `subscribeToTopic` / `unsubscribeFromTopic` - Topic-Abonnements
+- `updateNotificationPreferences` - Benachrichtigungseinstellungen
+- `getDailyStats` / `getWeeklyStats` - Statistiken abrufen
+- `getUserProfile` / `updateUserProfile` - Profil-Verwaltung
+- `startFocusSession` / `completeFocusSession` - Fokus-Sitzungen
+- `logBlockedAttempt` - Blockierte Zugriffe protokollieren
+- `getAllRanks` / `getFriendsLeaderboard` - Ranglisten
+- `sendTestNotification` - Test-Benachrichtigungen
+- `getAppInsights` - App-Einblicke
 
 ## Installation
 
@@ -47,68 +52,91 @@ cd backend/functions
 npm install
 ```
 
-## Entwicklung
+## Scripts
 
 ```bash
-# TypeScript kompilieren
-npm run build
+npm run build          # TypeScript kompilieren
+npm run build:watch    # TypeScript im Watch-Modus
+npm run serve          # Emulator starten
+npm run shell          # Functions Shell
+npm run deploy         # Zu Firebase deployen
+npm run logs           # Logs anzeigen
+npm run test           # Tests ausführen
+npm run test:watch     # Tests im Watch-Modus
+npm run test:coverage  # Tests mit Coverage
+npm run lint           # ESLint prüfen
+```
 
-# Tests ausführen
+## Tests
+
+Alle 165 Tests bestehen erfolgreich:
+
+```bash
 npm test
+```
 
-# Linting
-npm run lint
+Test-Suites:
+- `leaderboardService.test.ts` - Leaderboard Service Tests
+- `pushNotificationService.test.ts` - Push Notification Tests
+- `appUsageTracker.test.ts` - App Usage Tracking Tests
+- `badgeVerificationSystem.test.ts` - Badge System Tests
+- `functions.test.ts` - Cloud Functions Tests
+- `triggers.test.ts` - Firestore Trigger Tests
+- `httpFunctions.test.ts` - HTTP Function Tests
+- `services.test.ts` - Service Integration Tests
+
+## Projektstruktur
+
+```
+backend/functions/
+├── src/
+│   ├── config/
+│   │   └── firebase.ts          # Firebase Admin Konfiguration
+│   ├── services/
+│   │   ├── leaderboardService.ts
+│   │   ├── pushNotificationService.ts
+│   │   ├── appUsageTracker.ts
+│   │   ├── badgeVerificationSystem.ts
+│   │   ├── analyticsService.ts
+│   │   └── challengeService.ts
+│   ├── triggers/
+│   │   ├── firestoreTriggers.ts
+│   │   ├── scheduledTriggers.ts
+│   │   ├── httpFunctions.ts
+│   │   └── additionalFunctions.ts
+│   └── index.ts                 # Hauptexporte
+├── __tests__/                   # Test-Dateien
+├── lib/                         # Kompilierte JavaScript-Dateien
+├── package.json
+├── tsconfig.json
+└── jest.config.js
+```
+
+## API-Dokumentation
+
+Siehe [API.md](./API.md) für detaillierte API-Dokumentation.
+
+## Umgebungsvariablen
+
+Erstelle eine `.env` Datei:
+
+```
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_PRIVATE_KEY=your-private-key
+FIREBASE_CLIENT_EMAIL=your-client-email
 ```
 
 ## Deployment
 
 ```bash
-# Firebase Login (einmalig)
-npx firebase login
+# Login
+firebase login
 
-# Deploy Functions
+# Deploy
 npm run deploy
-```
 
-## Projektstruktur
-
-```
-backend/
-├── firebase.json          # Firebase Konfiguration
-├── firestore.rules        # Firestore Sicherheitsregeln
-├── firestore.indexes.json # Firestore Indizes
-└── functions/
-    ├── package.json
-    ├── tsconfig.json
-    ├── jest.config.js
-    ├── src/
-    │   ├── index.ts                    # Hauptexport
-    │   ├── config/
-    │   │   └── firebase.ts             # Firebase Initialisierung
-    │   ├── services/
-    │   │   ├── appUsageTracker.ts      # Nutzungs-Tracking
-    │   │   ├── leaderboardService.ts   # Ranglisten-Logik
-    │   │   ├── pushNotificationService.ts # Push-Benachrichtigungen
-    │   │   └── badgeVerificationSystem.ts # Badge-System
-    │   └── triggers/
-    │       ├── firestoreTriggers.ts    # Firestore Trigger
-    │       ├── scheduledTriggers.ts    # Zeitgesteuerte Funktionen
-    │       └── httpFunctions.ts        # HTTP Callable Functions
-    └── __tests__/
-        ├── setup.ts
-        ├── appUsageTracker.test.ts
-        ├── leaderboardService.test.ts
-        ├── pushNotificationService.test.ts
-        └── badgeVerificationSystem.test.ts
-```
-
-## Umgebungsvariablen
-
-Erstelle eine `.env` Datei in `functions/`:
-
-```
-FIREBASE_CONFIG={...}
-GCLOUD_PROJECT=your-project-id
+# Oder nur Functions
+firebase deploy --only functions
 ```
 
 ## Lizenz
