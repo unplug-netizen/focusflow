@@ -1,81 +1,89 @@
 # FocusFlow Code Review Report
 
-**Review Datum:** 2026-03-14  
+**Review Datum:** 2026-03-14 (Follow-up Review)  
 **Reviewer:** FocusFlow Code-Reviewer Agent  
 **Repository:** /data/.openclaw/workspace/focusflow/  
-**Code-Statistik:** ~5.600 Zeilen TypeScript/React Native Code in 33 Dateien
+**Code-Statistik:** ~6.000 Zeilen TypeScript/React Native Code
 
 ---
 
 ## 📊 Zusammenfassung
 
-Die FocusFlow App ist eine gut strukturierte React Native Anwendung mit TypeScript, Redux Toolkit und Firebase-Integration. Der Code zeigt insgesamt eine gute Architektur mit klaren Trennungen, jedoch gibt es einige Bereiche mit Verbesserungspotenzial.
+Die FocusFlow App zeigt eine solide Architektur mit guten Verbesserungen seit der letzten Review. Kritische Probleme wurden behoben, darunter die Implementierung der Error Boundary. Es verbleiben jedoch einige Code-Qualitäts-Issues, die angegangen werden sollten.
 
 **Gesamtbewertung:** ⭐⭐⭐⭐ (4/5) - Gut, mit Optimierungspotenzial
 
 ---
 
-## ✅ Positive Aspekte
+## ✅ Positive Aspekte (Neu & Bestehend)
 
-### 1. Architektur & Projektstruktur
-- **Klare Ordnerstruktur:** `src/components/`, `src/screens/`, `src/store/`, `src/theme/`, `src/types/`
-- **Konsistente Dateibenennung:** PascalCase für Komponenten, camelCase für utilities
-- **Gute Separation of Concerns:** UI-Komponenten, State Management und Business-Logik sind getrennt
-- **Modularer Aufbau:** Wiederverwendbare Komponenten mit klaren Interfaces
+### 1. Error Boundary Implementiert ✅
+**Status:** Behoben seit letzter Review  
+Die `ErrorBoundary.tsx` Komponente ist jetzt korrekt implementiert:
+- Klassen-basierte Error Boundary mit `getDerivedStateFromError`
+- Theme-Unterstützung durch Wrapper-Komponente
+- Entwicklungs-Modus zeigt Fehlerdetails
+- "Erneut versuchen" Funktionalität
+- Wird korrekt in `App.tsx` verwendet
 
-### 2. TypeScript & Typisierung
-- **Strikte Typisierung:** Alle Redux-Slices haben definierte State-Interfaces
-- **Zentrale Typdefinitionen:** `src/types/index.ts` enthält alle gemeinsamen Typen
-- **Gute Verwendung von Generics:** `RootState`, `AppDispatch` sind korrekt typisiert
-- **Enum-Typen:** `AppCategory`, `TimerStatus`, `LeaderboardCategory` als Union-Types
+### 2. Konstanten-Zentralisierung ✅
+**Datei:** `src/constants/index.ts`  
+Alle magischen Zahlen sind jetzt zentral definiert:
+```typescript
+export const POMODORO_DURATION = 25;
+export const DEFAULT_DAILY_GOAL_MINUTES = 120;
+export const POMODORO_COMPLETE_COINS = 10;
+```
 
-### 3. State Management
-- **Redux Toolkit:** Moderner Ansatz mit `createSlice` und `createAsyncThunk`
-- **Redux Persist:** Korrekte Persistenz-Konfiguration mit Whitelist
-- **Async Thunks:** Saubere Fehlerbehandlung mit `rejectWithValue`
-- **Selektive Persistenz:** Nur notwendige Slices werden persistiert
+### 3. TypeScript Striktheit ✅
+- `strict: true` in `tsconfig.json`
+- Keine TypeScript-Fehler bei `npm run type-check`
+- Gute Typ-Definitionen in `src/types/index.ts`
 
-### 4. UI/UX
-- **Theme-System:** Konsistentes Light/Dark Mode System mit ThemeContext
-- **Wiederverwendbare Komponenten:** Button, Card, Input, ProgressBar mit flexiblen Props
-- **Responsive Design:** Flex-Layout und relative Größen
-- **Animationen:** Native Driver für Performance (Pulse, Scale)
+### 4. Backend-Testabdeckung ✅
+- 8 Test-Dateien mit umfassenden Tests
+- Mocking von Firebase-Funktionen
+- Tests für Services, Triggers und HTTP-Funktionen
 
-### 5. Backend (Firebase Functions)
-- **Umfassende Cloud Functions:** Firestore Triggers, Scheduled Functions, HTTP Callable
-- **Service-Pattern:** LeaderboardService, PushNotificationService etc. als Klassen
-- **Batch-Operations:** Effiziente Firestore-Batch-Updates (500er Chunks)
-- **Fehlerbehandlung:** Try-Catch in allen Triggers mit Logging
+### 5. State Management
+- Redux Toolkit mit korrekter Typisierung
+- Redux Persist mit Whitelist-Konfiguration
+- Async Thunks mit Fehlerbehandlung
 
 ---
 
 ## ⚠️ Warnungen (Mittel)
 
-### 1. Linting & Code-Formatierung
-**Problem:** ESLint zeigt ~200 Prettier-Fehler (Quotes, Spacing)  
+### 1. ESLint Quote-Konventionen
+**Problem:** Inkonsistente Quotes (doppelte statt einfache)  
 **Dateien:** Alle `.ts` und `.tsx` Dateien  
+**Beispiel:**
+```typescript
+import React, { useEffect } from "react";  // Sollte: 'react'
+```
 **Empfehlung:**
 ```bash
 npm run lint -- --fix
-# oder
-npx prettier --write "src/**/*.{ts,tsx}"
 ```
 
-### 2. Unbenutzte Variablen
-**Problem:** `label` Parameter in `TabIcon` Komponente wird nicht verwendet  
-**Datei:** `App.tsx:29`  
+### 2. Unstable Nested Components
+**Problem:** Komponenten werden während Render definiert  
+**Datei:** `App.tsx:71-104`  
 **Code:**
 ```typescript
-const TabIcon: React.FC<{focused: boolean; icon: string; label: string}> = ({
-  focused,
-  icon,
-  label, // ← unbenutzt
-}) => {
+tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="🏠" />
 ```
-**Empfehlung:** Entfernen oder mit `_label` prefixen
+**Risiko:** React erstellt bei jedem Render neue Komponenten-Typen  
+**Empfehlung:**
+```typescript
+const renderTabIcon = (icon: string) => ({ focused }: { focused: boolean }) => (
+  <TabIcon focused={focused} icon={icon} />
+);
+// ...
+tabBarIcon: renderTabIcon('🏠')
+```
 
-### 3. Inline Styles
-**Problem:** Dynamische Styles im Render  
+### 3. Inline Styles in TabIcon
 **Datei:** `App.tsx:34`  
 **Code:**
 ```typescript
@@ -86,46 +94,65 @@ style={{
 ```
 **Empfehlung:** StyleSheet verwenden oder Style-Objekte außerhalb definieren
 
-### 4. Unstable Nested Components
-**Problem:** Komponenten werden während Render definiert  
-**Datei:** `App.tsx:70-110`  
-**Problem:** React erstellt bei jedem Render neue Komponenten-Typen  
-**Code:**
-```typescript
-tabBarIcon: ({focused}) => (
-  <TabIcon focused={focused} icon="🏠" label="Home" />
-)
-```
-**Empfehlung:**
-```typescript
-const renderTabIcon = (icon: string) => ({focused}: {focused: boolean}) => (
-  <TabIcon focused={focused} icon={icon} />
-);
-// ...
-tabBarIcon: renderTabIcon('🏠')
-```
-
-### 5. `any` Typen in Tests
+### 4. `any` Typen in Tests
 **Problem:** Explizite `any` Typen in Test-Dateien  
-**Dateien:** `backend/functions/__tests__/*.test.ts`  
-**Beispiel:** `badgeVerificationSystem.test.ts:172`, `leaderboardService.test.ts:156`  
+**Dateien:** 
+- `backend/functions/__tests__/badgeVerificationSystem.test.ts:172`
+- `backend/functions/__tests__/leaderboardService.test.ts:156`
+- `backend/functions/__tests__/triggers.test.ts:171`
+
 **Empfehlung:** Spezifischere Typen oder `unknown` mit Type Guards verwenden
 
-### 6. Memory Leak Risiko
-**Problem:** Event Listener in `ProgressBar` nicht korrekt aufgeräumt  
+### 5. Navigation Type-Casting
+**Problem:** Navigation mit `as never` Type-Casting  
+**Dateien:** Mehrere Screen-Dateien  
+**Code:**
+```typescript
+navigation.navigate('Focus' as never);
+```
+**Empfehlung:** Typed Navigation verwenden
+```typescript
+type RootStackParamList = {
+  Focus: undefined;
+  Blocker: undefined;
+};
+const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+```
+
+---
+
+## 🔴 Kritische Probleme
+
+### 1. ProgressBar Animation Listener
+**Problem:** Event Listener könnte Memory Leak verursachen  
 **Datei:** `src/components/ProgressBar.tsx:52-56`  
 **Code:**
 ```typescript
 useEffect(() => {
-  const listener = animValue.addListener(({value}) => {
+  const listener = animValue.addListener(({ value }) => {
     setAnimatedWidth(value);
   });
   return () => animValue.removeListener(listener);
-}, []); // ← Leeres Dependency Array, aber animValue ändert sich
+}, [animValue]); // animValue ist eine Ref, ändert sich nie
 ```
-**Empfehlung:** `animValue` zu Dependencies hinzufügen oder Ref verwenden
+**Status:** Niedriges Risiko, da `animValue` eine Ref ist, aber der Listener wird bei jedem Re-Render neu erstellt.
 
-### 7. Interval Cleanup
+**Empfohlene Verbesserung:**
+```typescript
+useEffect(() => {
+  if (!animated) return;
+  
+  const listener = animValue.addListener(({ value }) => {
+    setAnimatedWidth(value);
+  });
+  
+  return () => {
+    animValue.removeListener(listener);
+  };
+}, [animated, animValue, percentage]);
+```
+
+### 2. Timer-Interval Race Condition
 **Problem:** Timer-Interval könnte Race Conditions haben  
 **Datei:** `src/screens/FocusModeScreen.tsx:45-56`  
 **Code:**
@@ -144,86 +171,38 @@ useEffect(() => {
 }, [timer.status, dispatch]);
 ```
 **Empfehlung:** Interval immer clearen wenn Status nicht 'running'
-
----
-
-## 🔴 Kritische Probleme
-
-### 1. Fehlende Error Boundary
-**Problem:** Keine React Error Boundaries implementiert  
-**Risiko:** App-Absturz bei unbehandelten Fehlern in Komponenten  
-**Empfehlung:**
 ```typescript
-// src/components/ErrorBoundary.tsx
-class ErrorBoundary extends React.Component {
-  state = { hasError: false };
-  static getDerivedStateFromError() {
-    return { hasError: true };
+useEffect(() => {
+  if (intervalRef.current) {
+    clearInterval(intervalRef.current);
+    intervalRef.current = null;
   }
-  componentDidCatch(error, errorInfo) {
-    console.error('ErrorBoundary caught:', error, errorInfo);
+  
+  if (timer.status === 'running') {
+    intervalRef.current = setInterval(() => {
+      dispatch(tick());
+    }, 1000);
   }
-  render() {
-    if (this.state.hasError) {
-      return <ErrorFallback />;
-    }
-    return this.props.children;
-  }
-}
+}, [timer.status, dispatch]);
 ```
 
-### 2. Keine Input-Sanitization
-**Problem:** Firebase-Inputs werden nicht validiert/sanitized  
-**Datei:** `src/store/slices/authSlice.ts:28-35`  
-**Code:**
-```typescript
-const userData: User = {
-  id: uid,
-  email: email || '',
-  displayName: displayName || 'Anonymous User',
-  // ...
-};
-await firestore().collection('users').doc(uid).set(userData, {merge: true});
-```
-**Risiko:** Potenzielle NoSQL-Injection (begrenzt durch Firebase Security Rules)  
-**Empfehlung:** Eingaben vor dem Speichern validieren
-
-### 3. Hartkodierte Werte
-**Problem:** Magische Zahlen und Strings im Code  
-**Beispiele:**
-- `App.tsx:131` - `dailyGoal = 120` (2 Stunden)
-- `FocusModeScreen.tsx:25` - Timer-Durations (25, 5, 15 Minuten)
-- `authSlice.ts` - Fehlermeldungen direkt im Code
-
-**Empfehlung:** Konstanten in separate Datei auslagern
-```typescript
-// src/constants/app.ts
-export const DEFAULT_DAILY_GOAL_MINUTES = 120;
-export const POMODORO_DURATION = 25;
-export const SHORT_BREAK_DURATION = 5;
-```
-
-### 4. Fehlende Tests für Frontend
+### 3. Fehlende Frontend-Tests
 **Problem:** Keine Unit-Tests für React Native Komponenten  
-**Status:** Nur Backend-Tests vorhanden (8 Test-Dateien)  
-**Empfehlung:** Jest + React Native Testing Library einrichten
-
-### 5. Navigation Type-Safety
-**Problem:** Navigation mit `as never` Type-Casting  
-**Dateien:** Mehrere Screen-Dateien  
-**Code:**
-```typescript
-navigation.navigate('Focus' as never);
+**Status:** Nur Backend-Tests vorhanden  
+**Empfohlene Test-Struktur:**
 ```
-**Empfehlung:** Typed Navigation verwenden
-```typescript
-// src/types/navigation.ts
-type RootStackParamList = {
-  Focus: undefined;
-  Blocker: undefined;
-  // ...
-};
-const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+src/
+├── __tests__/
+│   ├── components/
+│   │   ├── Button.test.tsx
+│   │   ├── Timer.test.tsx
+│   │   └── ProgressBar.test.tsx
+│   ├── screens/
+│   │   ├── HomeScreen.test.tsx
+│   │   └── FocusModeScreen.test.tsx
+│   └── store/
+│       ├── authSlice.test.ts
+│       └── focusModeSlice.test.ts
 ```
 
 ---
@@ -232,18 +211,18 @@ const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
 ### 1. Performance-Optimierungen
 
-#### Memoization
-```typescript
-// In Listen-Komponenten
-const renderItem = useCallback(({item}) => <Item {...item} />, []);
-const keyExtractor = useCallback((item) => item.id, []);
-```
-
 #### useMemo für Berechnungen
 ```typescript
 const activeRules = useMemo(() => 
   rules.filter(r => r.isActive).length, 
 [rules]);
+```
+
+#### useCallback für Event Handler
+```typescript
+const handleQuickFocus = useCallback(() => {
+  navigation.navigate('Focus' as never);
+}, [navigation]);
 ```
 
 ### 2. Code-Qualität
@@ -259,24 +238,7 @@ export const useTimer = () => {
 };
 ```
 
-#### API-Layer einführen
-```typescript
-// src/api/auth.ts
-export const authApi = {
-  signIn: (email: string, password: string) => 
-    auth().signInWithEmailAndPassword(email, password),
-  // ...
-};
-```
-
 ### 3. Sicherheit
-
-#### Environment Variables
-```typescript
-// .env
-FIREBASE_API_KEY=xxx
-FIREBASE_PROJECT_ID=xxx
-```
 
 #### Input-Validierung
 ```typescript
@@ -284,20 +246,6 @@ const validateEmail = (email: string): boolean => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 };
-```
-
-### 4. Dokumentation
-
-#### JSDoc für Funktionen
-```typescript
-/**
- * Updates user score in leaderboard
- * @param userId - The user's unique identifier
- * @param category - Leaderboard category
- * @param score - New score value
- * @throws {FirebaseError} If update fails
- */
-async updateScore(userId: string, category: LeaderboardCategory, score: number): Promise<void>
 ```
 
 ---
@@ -311,42 +259,23 @@ async updateScore(userId: string, category: LeaderboardCategory, score: number):
 | Redux Slices | ❌ Fehlt | Keine Action/Reducer Tests |
 | Integration Tests | ❌ Fehlt | Keine E2E Tests |
 
-**Empfohlene Test-Struktur:**
-```
-src/
-├── __tests__/
-│   ├── components/
-│   │   ├── Button.test.tsx
-│   │   ├── Timer.test.tsx
-│   │   └── Card.test.tsx
-│   ├── screens/
-│   │   ├── HomeScreen.test.tsx
-│   │   └── FocusModeScreen.test.tsx
-│   └── store/
-│       ├── authSlice.test.ts
-│       └── focusModeSlice.test.ts
-```
-
 ---
 
 ## 🎯 Priorisierte Action-Items
 
 ### Sofort (Kritisch)
-1. ✅ Error Boundaries implementieren
-2. ✅ Prettier/ESLint Formatierung fixen
-3. ✅ Memory Leak in ProgressBar beheben
+1. ⚠️ Timer-Interval Race Condition beheben
+2. ⚠️ ESLint Formatierung fixen (`npm run lint -- --fix`)
 
 ### Kurzfristig (Wichtig)
-4. ⚠️ Frontend Unit-Tests hinzufügen
-5. ⚠️ Typed Navigation implementieren
-6. ⚠️ Konstanten auslagern
-7. ⚠️ Unstable Nested Components fixen
+3. ⚠️ Unstable Nested Components in App.tsx fixen
+4. ⚠️ Typed Navigation implementieren
+5. ⚠️ Frontend Unit-Tests hinzufügen
 
 ### Mittelfristig (Empfohlen)
-8. 📋 Custom Hooks für wiederholte Logik
-9. 📋 API-Layer abstrahieren
-10. 📋 E2E Tests mit Detox
-11. 📋 Performance-Monitoring einrichten
+6. 📋 Custom Hooks für wiederholte Logik
+7. 📋 Performance-Monitoring einrichten
+8. 📋 E2E Tests mit Detox
 
 ---
 
@@ -358,6 +287,7 @@ src/
 | Functional Components | ✅ | Alle Komponenten sind Functions |
 | Hooks | ✅ | Moderne React Hooks verwendet |
 | Redux Toolkit | ✅ | Aktuelles Redux Pattern |
+| Error Boundaries | ✅ | Implementiert in App.tsx |
 | Firebase Security | ⚠️ | Rules müssen geprüft werden |
 | Code Splitting | ❌ | Nicht implementiert |
 | Lazy Loading | ❌ | Nicht implementiert |
@@ -377,3 +307,16 @@ src/
 
 **Review abgeschlossen von:** FocusFlow Code-Reviewer Agent  
 **Nächste Review empfohlen:** Nach Implementierung der kritischen Fixes
+
+## Änderungen seit letzter Review
+
+### ✅ Behoben
+1. Error Boundary implementiert
+2. Konstanten zentralisiert in `src/constants/index.ts`
+3. TypeScript strikte Modus aktiviert
+
+### ⚠️ Noch offen
+1. ESLint Quote-Konventionen
+2. Unstable Nested Components
+3. Frontend-Tests fehlen
+4. Typed Navigation
