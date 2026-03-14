@@ -21,10 +21,7 @@ import {
   setTimerMode,
   completeSession,
 } from "../store/slices/focusModeSlice";
-import {
-  addFocusTime,
-  addFocusCoins,
-} from "../store/slices/statsSlice";
+import { addFocusTime, addFocusCoins } from "../store/slices/statsSlice";
 import { FocusSession } from "../types";
 import {
   POMODORO_DURATION,

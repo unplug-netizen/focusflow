@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, ViewStyle, Dimensions } from "react-native";
+import { View, Text, StyleSheet, ViewStyle } from "react-native";
 import { useTheme } from "../theme/ThemeContext";
 
 interface BarChartProps {

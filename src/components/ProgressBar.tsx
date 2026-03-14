@@ -49,8 +49,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
       setAnimatedWidth(value);
     });
     return () => animValue.removeListener(listener);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [animValue]);
 
   const getHeight = () => {
     switch (size) {
