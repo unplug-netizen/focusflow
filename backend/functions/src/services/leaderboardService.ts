@@ -1,8 +1,14 @@
 /**
  * Leaderboard Service
- * 
- * Manages leaderboard calculations and updates.
+ *
+ * Manages leaderboard calculations and updates for FocusFlow.
  * Supports multiple categories: screen_time, focus_time, badges, streak, weekly_challenge
+ *
+ * Features:
+ * - Real-time score updates for all categories
+ * - Weekly challenge reset functionality
+ * - Batch processing for large user bases
+ * - Optimized score calculations with inverted screen time scoring
  */
 
 import {db, Timestamp} from '../config/firebase';

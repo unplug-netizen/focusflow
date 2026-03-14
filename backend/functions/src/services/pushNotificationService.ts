@@ -1,9 +1,17 @@
 /**
  * Push Notification Service
- * 
- * Handles sending push notifications to users via Firebase Cloud Messaging.
+ *
+ * Handles sending push notifications to users via Firebase Cloud Messaging (FCM).
  * Supports various notification types: streak reminders, achievement unlocks,
  * leaderboard updates, and custom messages.
+ *
+ * Features:
+ * - Multi-platform support (iOS/Android)
+ * - Topic-based messaging
+ * - Quiet hours handling with notification queuing
+ * - User preference respect
+ * - Automatic token cleanup for invalid tokens
+ * - Multicast messaging for efficiency
  */
 
 import {messaging, db, Timestamp} from '../config/firebase';

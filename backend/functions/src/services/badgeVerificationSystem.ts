@@ -1,8 +1,16 @@
 /**
  * Badge Verification System
- * 
- * Handles badge unlock logic and verification.
- * Checks user progress against badge requirements and awards badges.
+ *
+ * Handles badge unlock logic and verification for FocusFlow.
+ * Checks user progress against badge requirements and awards badges with Focus Coins rewards.
+ *
+ * Features:
+ * - 11 predefined badges across 4 tiers (bronze, silver, gold, platinum)
+ * - Multiple requirement types: streak, focus_time, blocked_time, social_detox, etc.
+ * - Automatic badge initialization for new users
+ * - Focus Coins rewards on badge unlock
+ * - Progress tracking for incomplete badges
+ * - Integration with PushNotificationService for unlock notifications
  */
 
 import {db, FieldValue, Timestamp} from '../config/firebase';

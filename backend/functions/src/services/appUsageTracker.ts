@@ -1,9 +1,17 @@
 /**
  * App Usage Tracking Service
- * 
- * Handles tracking and aggregation of app usage data for users.
+ *
+ * Handles tracking and aggregation of app usage data for FocusFlow users.
  * Provides methods for logging usage, calculating daily/weekly stats,
  * and detecting violations of app blocking rules.
+ *
+ * Features:
+ * - Real-time usage logging with batch operations
+ * - Daily and weekly statistics aggregation
+ * - App limit violation detection
+ * - Leaderboard data aggregation
+ * - Automatic cleanup of old logs (90 days retention)
+ * - Category-based usage breakdown
  */
 
 import {db, FieldValue, Timestamp} from '../config/firebase';
