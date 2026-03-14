@@ -14,6 +14,39 @@ export {BadgeVerificationSystem, createBadgeVerificationSystem} from './services
 export {AnalyticsService, analyticsService} from './services/analyticsService';
 export {ChallengeService, createChallengeService} from './services/challengeService';
 
+// Export utilities
+export {
+  checkRateLimit,
+  getRateLimitStatus,
+  clearRateLimit,
+  cleanupRateLimiterStore,
+  withRateLimit,
+  rateLimitConfigs,
+} from './utils/rateLimiter';
+
+export {
+  logError,
+  withRetry,
+  withErrorHandling,
+  getRecentErrors,
+  getErrorStats,
+  clearErrorLog,
+  createLogger,
+} from './utils/errorTracker';
+
+export {
+  validateString,
+  validateNumber,
+  validateArray,
+  validateEnum,
+  validateDateString,
+  combineValidations,
+  assertValid,
+  sanitizeString,
+  validateFcmToken,
+  validateUserId,
+} from './utils/validation';
+
 // Firestore triggers
 import {
   onUserStatsUpdate,

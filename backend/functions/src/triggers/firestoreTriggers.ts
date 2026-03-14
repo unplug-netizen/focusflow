@@ -1,9 +1,14 @@
 /**
- * Firebase Cloud Functions - Firestore Triggers
+ * Firebase Cloud Functions - Firestore Triggers (Enhanced)
  * 
  * These functions respond to Firestore document changes
  * and perform backend operations like updating leaderboards,
  * sending notifications, and verifying badges.
+ * 
+ * Enhanced with:
+ * - Retry logic for transient failures
+ * - Structured error handling and logging
+ * - Batch processing optimizations
  */
 
 import * as functions from 'firebase-functions';
@@ -14,9 +19,11 @@ import {
   BadgeVerificationSystem,
   createBadgeVerificationSystem,
 } from '../services/badgeVerificationSystem';
+import {withRetry, createLogger} from '../utils/errorTracker';
 
 // Initialize services
 const badgeSystem = createBadgeVerificationSystem(pushNotificationService);
+const logger = createLogger('firestoreTriggers');
 
 /**
  * Trigger: When a user's stats are updated
@@ -32,15 +39,24 @@ export const onUserStatsUpdate = functions.firestore
     try {
       // Update streak leaderboard if streak changed
       if (newData.currentStreak !== oldData.currentStreak) {
-        await leaderboardService.updateScore(
-          userId,
-          'streak',
-          newData.currentStreak || 0,
+        await withRetry(
+          () => leaderboardService.updateScore(
+            userId,
+            'streak',
+            newData.currentStreak || 0,
+            {
+              displayName: newData.displayName || 'Anonymous',
+              photoURL: newData.photoURL,
+              streak: newData.currentStreak || 0,
+            }
+          ),
           {
-            displayName: newData.displayName || 'Anonymous',
-            photoURL: newData.photoURL,
-            streak: newData.currentStreak || 0,
-          }
+            functionName: 'onUserStatsUpdate',
+            operation: 'updateStreakLeaderboard',
+            userId,
+          },
+          3,
+          1000
         );
       }
 
@@ -64,28 +80,46 @@ export const onUserStatsUpdate = functions.firestore
           0
         );
 
-        await leaderboardService.updateScore(
-          userId,
-          'badges',
-          badgeScore,
+        await withRetry(
+          () => leaderboardService.updateScore(
+            userId,
+            'badges',
+            badgeScore,
+            {
+              displayName: newData.displayName || 'Anonymous',
+              photoURL: newData.photoURL,
+              streak: newData.currentStreak || 0,
+            }
+          ),
           {
-            displayName: newData.displayName || 'Anonymous',
-            photoURL: newData.photoURL,
-            streak: newData.currentStreak || 0,
-          }
+            functionName: 'onUserStatsUpdate',
+            operation: 'updateBadgesLeaderboard',
+            userId,
+          },
+          3,
+          1000
         );
       }
 
       // Check for new badge unlocks
-      const newBadges = await badgeSystem.checkAndAwardBadges(userId);
+      const newBadges = await withRetry(
+        () => badgeSystem.checkAndAwardBadges(userId),
+        {
+          functionName: 'onUserStatsUpdate',
+          operation: 'checkAndAwardBadges',
+          userId,
+        },
+        3,
+        1000
+      );
 
       if (newBadges.length > 0) {
-        console.log(`User ${userId} unlocked badges:`, newBadges);
+        logger.info('User unlocked badges', { userId, newBadges });
       }
 
       return null;
     } catch (error) {
-      console.error('Error in onUserStatsUpdate:', error);
+      logger.error(error as Error, 'onUserStatsUpdate', { userId });
       return null;
     }
   });
@@ -110,6 +144,7 @@ export const onFocusSessionComplete = functions.firestore
       const userData = userDoc.data();
 
       if (!userData) {
+        logger.warn('User not found for focus session', { userId });
         return null;
       }
 
@@ -131,23 +166,50 @@ export const onFocusSessionComplete = functions.firestore
       );
 
       // Update leaderboard
-      await leaderboardService.updateScore(
-        userId,
-        'focus_time',
-        weeklyFocusTime,
+      await withRetry(
+        () => leaderboardService.updateScore(
+          userId,
+          'focus_time',
+          weeklyFocusTime,
+          {
+            displayName: userData.displayName || 'Anonymous',
+            photoURL: userData.photoURL,
+            streak: userData.currentStreak || 0,
+          }
+        ),
         {
-          displayName: userData.displayName || 'Anonymous',
-          photoURL: userData.photoURL,
-          streak: userData.currentStreak || 0,
-        }
+          functionName: 'onFocusSessionComplete',
+          operation: 'updateFocusTimeLeaderboard',
+          userId,
+        },
+        3,
+        1000
       );
 
       // Check badges
-      await badgeSystem.checkAndAwardBadges(userId);
+      await withRetry(
+        () => badgeSystem.checkAndAwardBadges(userId),
+        {
+          functionName: 'onFocusSessionComplete',
+          operation: 'checkBadges',
+          userId,
+        },
+        3,
+        1000
+      );
+
+      logger.info('Focus session completed and processed', { 
+        userId, 
+        sessionId: context.params.sessionId,
+        weeklyFocusTime 
+      });
 
       return null;
     } catch (error) {
-      console.error('Error in onFocusSessionComplete:', error);
+      logger.error(error as Error, 'onFocusSessionComplete', { 
+        userId,
+        sessionId: context.params.sessionId 
+      });
       return null;
     }
   });
@@ -172,6 +234,7 @@ export const onDailyStatsUpdate = functions.firestore
       const userData = userDoc.data();
 
       if (!userData) {
+        logger.warn('User not found for daily stats update', { userId });
         return null;
       }
 
@@ -196,20 +259,29 @@ export const onDailyStatsUpdate = functions.firestore
       const maxScreenTime = 3360; // 8 hours/day * 7 days
       const score = Math.max(0, Math.round(maxScreenTime - weeklyScreenTime));
 
-      await leaderboardService.updateScore(
-        userId,
-        'screen_time',
-        score,
+      await withRetry(
+        () => leaderboardService.updateScore(
+          userId,
+          'screen_time',
+          score,
+          {
+            displayName: userData.displayName || 'Anonymous',
+            photoURL: userData.photoURL,
+            streak: userData.currentStreak || 0,
+          }
+        ),
         {
-          displayName: userData.displayName || 'Anonymous',
-          photoURL: userData.photoURL,
-          streak: userData.currentStreak || 0,
-        }
+          functionName: 'onDailyStatsUpdate',
+          operation: 'updateScreenTimeLeaderboard',
+          userId,
+        },
+        3,
+        1000
       );
 
       return null;
     } catch (error) {
-      console.error('Error in onDailyStatsUpdate:', error);
+      logger.error(error as Error, 'onDailyStatsUpdate', { userId });
       return null;
     }
   });
@@ -225,25 +297,43 @@ export const onUserCreate = functions.firestore
 
     try {
       // Initialize badges
-      await badgeSystem.initializeBadges();
+      await withRetry(
+        () => badgeSystem.initializeBadges(),
+        {
+          functionName: 'onUserCreate',
+          operation: 'initializeBadges',
+          userId,
+        },
+        3,
+        1000
+      );
 
       // Create default notification settings
-      await db
-        .collection('users')
-        .doc(userId)
-        .collection('settings')
-        .doc('notifications')
-        .set({
-          streakReminders: true,
-          achievementNotifications: true,
-          leaderboardUpdates: true,
-          dailySummary: true,
-          challengeReminders: true,
-          limitWarnings: true,
-          focusReminders: true,
-          quietHoursStart: '22:00',
-          quietHoursEnd: '08:00',
-        });
+      await withRetry(
+        () => db
+          .collection('users')
+          .doc(userId)
+          .collection('settings')
+          .doc('notifications')
+          .set({
+            streakReminders: true,
+            achievementNotifications: true,
+            leaderboardUpdates: true,
+            dailySummary: true,
+            challengeReminders: true,
+            limitWarnings: true,
+            focusReminders: true,
+            quietHoursStart: '22:00',
+            quietHoursEnd: '08:00',
+          }),
+        {
+          functionName: 'onUserCreate',
+          operation: 'createNotificationSettings',
+          userId,
+        },
+        3,
+        1000
+      );
 
       // Initialize user badges
       const batch = db.batch();
@@ -263,11 +353,23 @@ export const onUserCreate = functions.firestore
               : (badge.requirement as {minutes?: number}).minutes || 1,
         });
       }
-      await batch.commit();
+      
+      await withRetry(
+        () => batch.commit(),
+        {
+          functionName: 'onUserCreate',
+          operation: 'initializeUserBadges',
+          userId,
+        },
+        3,
+        1000
+      );
+
+      logger.info('New user initialized successfully', { userId });
 
       return null;
     } catch (error) {
-      console.error('Error in onUserCreate:', error);
+      logger.error(error as Error, 'onUserCreate', { userId });
       return null;
     }
   });
@@ -284,12 +386,14 @@ export const onBlockedAttempt = functions.firestore
 
     try {
       // Check if this is a repeated attempt
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+      
       const recentAttempts = await db
         .collection('users')
         .doc(userId)
         .collection('blockedAttempts')
         .where('packageName', '==', attemptData.packageName)
-        .where('timestamp', '>=', new Date(Date.now() - 5 * 60 * 1000)) // Last 5 minutes
+        .where('timestamp', '>=', fiveMinutesAgo)
         .get();
 
       // Send warning if multiple attempts in short time
@@ -299,26 +403,45 @@ export const onBlockedAttempt = functions.firestore
 
         if (userData) {
           const appName = attemptData.appName || 'diese App';
-          await pushNotificationService.sendToUser(
-            userId,
-            {
-              type: 'limit_warning',
-              title: '🚫 Bleib fokussiert!',
-              body: `Du hast versucht, ${appName} mehrmals zu öffnen. Bleib stark!`,
-              data: {
-                appName,
-                attempts: recentAttempts.size.toString(),
-                action: 'view_focus_mode',
+          
+          await withRetry(
+            () => pushNotificationService.sendToUser(
+              userId,
+              {
+                type: 'limit_warning',
+                title: '🚫 Bleib fokussiert!',
+                body: `Du hast versucht, ${appName} mehrmals zu öffnen. Bleib stark!`,
+                data: {
+                  appName,
+                  attempts: recentAttempts.size.toString(),
+                  action: 'view_focus_mode',
+                },
               },
+              {respectQuietHours: true}
+            ),
+            {
+              functionName: 'onBlockedAttempt',
+              operation: 'sendWarningNotification',
+              userId,
             },
-            {respectQuietHours: true}
+            3,
+            1000
           );
+
+          logger.info('Warning notification sent for repeated blocked attempts', {
+            userId,
+            appName,
+            attemptCount: recentAttempts.size,
+          });
         }
       }
 
       return null;
     } catch (error) {
-      console.error('Error in onBlockedAttempt:', error);
+      logger.error(error as Error, 'onBlockedAttempt', { 
+        userId,
+        attemptId: context.params.attemptId 
+      });
       return null;
     }
   });
