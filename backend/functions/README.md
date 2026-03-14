@@ -1,101 +1,36 @@
-/**
- * README für FocusFlow Backend
- * 
- * Firebase Cloud Functions Backend für die FocusFlow App
- */
-
 # FocusFlow Backend
 
-Dieses Verzeichnis enthält die Firebase Cloud Functions für das FocusFlow Backend.
+Firebase Cloud Functions Backend für die FocusFlow App.
 
-## Struktur
+## Features
 
-```
-backend/functions/
-├── src/
-│   ├── config/
-│   │   └── firebase.ts          # Firebase Admin Konfiguration
-│   ├── services/
-│   │   ├── analyticsService.ts   # Analytics und Reports
-│   │   ├── appUsageTracker.ts    # App-Nutzungs-Tracking
-│   │   ├── badgeVerificationSystem.ts  # Badge-System
-│   │   ├── challengeService.ts   # Wöchentliche Challenges
-│   │   ├── leaderboardService.ts # Ranglisten-Verwaltung
-│   │   └── pushNotificationService.ts  # Push-Benachrichtigungen
-│   ├── triggers/
-│   │   ├── additionalFunctions.ts  # Zusätzliche HTTP Functions
-│   │   ├── firestoreTriggers.ts    # Firestore Trigger
-│   │   ├── httpFunctions.ts        # HTTP Callable Functions
-│   │   └── scheduledTriggers.ts    # Zeitgesteuerte Functions
-│   └── index.ts                    # Haupt-Export
-├── __tests__/                      # Test-Dateien
-│   ├── functions.test.ts
-│   ├── services.test.ts
-│   └── setup.ts
-├── package.json
-└── tsconfig.json
-```
+### Services
+- **LeaderboardService** - Ranglisten-Verwaltung mit 5 Kategorien (Screen Time, Focus Time, Badges, Streak, Weekly Challenge)
+- **PushNotificationService** - Push-Benachrichtigungen via Firebase Cloud Messaging
+- **AppUsageTracker** - App-Nutzungs-Tracking und Statistik-Aggregation
+- **BadgeVerificationSystem** - Badge-Freischalt-Logik mit 11 vordefinierten Badges
+- **AnalyticsService** - Nutzungsanalyse und Insights
+- **ChallengeService** - Wochen-Challenge-Verwaltung
 
-## Services
+### Cloud Functions
 
-### LeaderboardService
-Verwaltet Ranglisten für verschiedene Kategorien:
-- `screen_time` - Weniger Bildschirmzeit = höherer Score
-- `focus_time` - Mehr Fokuszeit = höherer Score
-- `badges` - Anzahl und Wert der Badges
-- `streak` - Aktuelle Streak-Länge
-- `weekly_challenge` - Wöchentliche Challenge-Punkte
+#### Firestore Triggers
+- `onUserStatsUpdate` - Aktualisiert Ranglisten bei User-Änderungen
+- `onFocusSessionComplete` - Verarbeitet abgeschlossene Fokus-Sitzungen
+- `onDailyStatsUpdate` - Aktualisiert Screen-Time-Rangliste
+- `onUserCreate` - Initialisiert neue User (Badges, Einstellungen)
+- `onBlockedAttempt` - Reagiert auf blockierte App-Versuche
 
-### PushNotificationService
-Sendet Push-Benachrichtigungen via Firebase Cloud Messaging:
-- Streak-Erinnerungen
-- Badge-Freischaltungen
-- Ranglisten-Updates
-- Tägliche Zusammenfassungen
-- Limit-Warnungen
+#### Scheduled Functions
+- `dailySummaryNotification` - Tägliche Zusammenfassung (21:00 Uhr)
+- `streakReminderCheck` - Streak-Erinnerungen (20:00 Uhr)
+- `dailyLeaderboardUpdate` - Ranglisten-Neuberechnung (00:00 Uhr)
+- `weeklyChallengeReset` - Wochen-Challenge-Reset (Montag 00:00 Uhr)
+- `cleanupOldLogs` - Bereinigung alter Logs (02:00 Uhr)
+- `processQueuedNotifications` - Verarbeitet wartende Benachrichtigungen (stündlich)
+- `dailyBadgeCheck` - Badge-Überprüfung (06:00 Uhr)
 
-### AppUsageTracker
-Trackt und aggregiert App-Nutzungsdaten:
-- Tägliche Nutzungsstatistiken
-- Wöchentliche Übersichten
-- Limit-Überschreitungs-Prüfung
-- Automatische Bereinigung alter Logs
-
-### BadgeVerificationSystem
-Verwaltet das Badge-System mit 11 vordefinierten Badges:
-- Streak-Badges (7, 30, 100 Tage)
-- Focus King (100 Stunden Fokus)
-- Social Detox (1 Woche ohne Social Media)
-- Digital Sabbath (24 Stunden offline)
-- Sleep Champion (30 Tage Schlafenszeit)
-- Early Bird (Kein Social Media vor 8 Uhr)
-- Weekend Warrior (Wochenende ohne Mobile Games)
-- Time Saver / Master Saver (10/100 Stunden gespart)
-
-### ChallengeService
-Verwaltet wöchentliche Challenges:
-- Automatische Erstellung jede Woche
-- 3 zufällige Challenges aus 7 Vorlagen
-- Fortschritts-Tracking
-- Belohnungs-System
-
-### AnalyticsService
-Generiert Analytics und Insights:
-- Tägliche Reports
-- User-Produktivitäts-Scores
-- Kategorie-basierte Analytics
-- Retention-Metriken
-
-## Cloud Functions
-
-### Firestore Triggers
-- `onUserStatsUpdate` - Reagiert auf User-Statistik-Updates
-- `onFocusSessionComplete` - Verarbeitet abgeschlossene Fokus-Sessions
-- `onDailyStatsUpdate` - Aktualisiert tägliche Statistiken
-- `onUserCreate` - Initialisiert neue User
-- `onBlockedAttempt` - Verarbeitet blockierte App-Zugriffe
-
-### HTTP Callable Functions
+#### HTTP Callable Functions
 - `registerFcmToken` / `unregisterFcmToken` - FCM Token-Verwaltung
 - `getLeaderboard` - Rangliste abrufen
 - `logAppUsage` - App-Nutzung loggen
@@ -104,54 +39,98 @@ Generiert Analytics und Insights:
 - `updateNotificationPreferences` - Benachrichtigungseinstellungen
 - `getDailyStats` / `getWeeklyStats` - Statistiken abrufen
 - `getUserProfile` / `updateUserProfile` - Profil-Verwaltung
-- `startFocusSession` / `completeFocusSession` - Fokus-Sessions
+- `startFocusSession` / `completeFocusSession` - Fokus-Sitzungen
 - `logBlockedAttempt` - Blockierte Versuche loggen
-- `getAllRanks` / `getFriendsLeaderboard` - Rang-Informationen
+- `getAllRanks` / `getFriendsLeaderboard` - Ranglisten-Abfragen
 - `sendTestNotification` - Test-Benachrichtigung senden
 - `getAppInsights` - App-Nutzungs-Insights
 
-### Scheduled Functions
-- `dailySummaryNotification` - Tägliche Zusammenfassung (21:00)
-- `streakReminderCheck` - Streak-Erinnerungen (20:00)
-- `dailyLeaderboardUpdate` - Ranglisten-Update (Mitternacht)
-- `weeklyChallengeReset` - Wöchentliche Challenge-Reset (Montag)
-- `cleanupOldLogs` - Alte Logs bereinigen (02:00)
-- `processQueuedNotifications` - Warteschlangen-Verarbeitung (stündlich)
-- `dailyBadgeCheck` - Badge-Überprüfung (06:00)
+## Technologie-Stack
 
-## Entwicklung
+- Firebase Cloud Functions
+- Firebase Admin SDK
+- Firebase Cloud Messaging
+- TypeScript 5.3.3
+- Jest (Testing)
 
-### Installation
+## Installation
+
 ```bash
 cd backend/functions
 npm install
 ```
 
-### Build
+## Scripts
+
 ```bash
-npm run build
+npm run build           # TypeScript kompilieren
+npm run build:watch     # TypeScript im Watch-Modus
+npm run serve           # Emulator starten
+npm run deploy          # Functions deployen
+npm run test            # Tests ausführen
+npm run test:coverage   # Tests mit Coverage
+npm run lint            # ESLint prüfen
 ```
 
-### Tests
-```bash
-npm test
+## Projektstruktur
+
+```
+backend/functions/
+├── src/
+│   ├── config/
+│   │   └── firebase.ts       # Firebase Admin Konfiguration
+│   ├── services/
+│   │   ├── leaderboardService.ts
+│   │   ├── pushNotificationService.ts
+│   │   ├── appUsageTracker.ts
+│   │   ├── badgeVerificationSystem.ts
+│   │   ├── analyticsService.ts
+│   │   └── challengeService.ts
+│   ├── triggers/
+│   │   ├── firestoreTriggers.ts
+│   │   ├── scheduledTriggers.ts
+│   │   ├── httpFunctions.ts
+│   │   └── additionalFunctions.ts
+│   └── index.ts              # Haupt-Export
+├── __tests__/                # Test-Dateien
+└── lib/                      # Kompilierte JavaScript-Dateien
 ```
 
-### Lint
-```bash
-npm run lint
-```
+## Badges
 
-### Deployment
-```bash
-firebase deploy --only functions
-```
+| Badge | Name | Beschreibung | Tier | Reward |
+|-------|------|--------------|------|--------|
+| streak_7 | Week Warrior | 7 Tage ohne blockierte Apps | Bronze | 50 |
+| streak_30 | Month Master | 30 Tage Streak | Silver | 200 |
+| streak_100 | Centurion | 100 Tage Streak | Gold | 500 |
+| focus_king | Focus King | 100 Stunden Fokus-Modus | Platinum | 1000 |
+| social_detox_7 | Social Detox | 1 Woche ohne Social Media | Silver | 150 |
+| digital_sabbath | Digital Sabbath | 24 Stunden offline | Gold | 300 |
+| sleep_champion | Sleep Champion | 30 Tage Schlafenszeit | Gold | 300 |
+| early_bird | Early Bird | 7 Tage kein Social Media vor 8 Uhr | Bronze | 50 |
+| weekend_warrior | Weekend Warrior | Wochenende ohne Mobile Games | Silver | 100 |
+| time_saver | Time Saver | 10 Stunden gespart | Bronze | 75 |
+| master_saver | Master Saver | 100 Stunden gespart | Gold | 500 |
 
 ## Umgebungsvariablen
 
-Stelle sicher, dass folgende Umgebungsvariablen gesetzt sind:
-- `FIREBASE_PROJECT_ID` - Firebase Projekt ID
-- `FIREBASE_SERVICE_ACCOUNT` - Service Account JSON (optional für lokal)
+```bash
+# Firebase-Projekt konfigurieren
+firebase use <project-id>
+
+# Oder via environment
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
+```
+
+## Deployment
+
+```bash
+# Alle Functions deployen
+firebase deploy --only functions
+
+# Einzelne Function deployen
+firebase deploy --only functions:getLeaderboard
+```
 
 ## Lizenz
 
