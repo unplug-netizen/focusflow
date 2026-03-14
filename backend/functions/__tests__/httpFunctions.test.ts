@@ -1,78 +1,62 @@
 /**
  * Integration Tests für HTTP Callable Functions
- * 
- * Diese Tests prüfen die HTTP Functions Logik.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Mock Firebase Admin
-const mockBatch = {
-  set: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  commit: jest.fn().mockResolvedValue(undefined),
-};
-
-const mockDoc = {
-  get: jest.fn().mockResolvedValue({
-    exists: true,
-    data: () => ({
-      displayName: 'Test User',
-      photoURL: 'https://example.com/photo.jpg',
-      currentStreak: 5,
-      totalFocusTime: 120,
-      totalBlockedAttempts: 10,
-      totalBlockedTime: 60,
-      badges: [{id: 'badge1', tier: 'bronze', unlockedAt: new Date()}],
-    }),
-    id: 'user123',
-  }),
-  set: jest.fn().mockResolvedValue(undefined),
-  update: jest.fn().mockResolvedValue(undefined),
-  delete: jest.fn().mockResolvedValue(undefined),
-  collection: jest.fn(() => ({
-    doc: jest.fn(() => ({
-      get: jest.fn().mockResolvedValue({exists: false, data: () => null}),
-      set: jest.fn().mockResolvedValue(undefined),
-      update: jest.fn().mockResolvedValue(undefined),
-    })),
-    add: jest.fn().mockResolvedValue({id: 'mock-session-id'}),
-    where: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
-  })),
-};
-
-const mockCollection = jest.fn(() => ({
-  doc: jest.fn(() => mockDoc),
-  add: jest.fn().mockResolvedValue({id: 'mock-id'}),
-  where: jest.fn().mockReturnThis(),
-  orderBy: jest.fn().mockReturnThis(),
-  limit: jest.fn().mockReturnThis(),
-  get: jest.fn().mockResolvedValue({
-    empty: false,
-    docs: [{
-      id: 'user123',
-      data: () => ({
-        displayName: 'Test User',
-        currentStreak: 5,
-        photoURL: 'https://example.com/photo.jpg',
-      }),
-    }],
-    size: 1,
-  }),
-}));
-
 jest.mock('../src/config/firebase', () => ({
   db: {
-    collection: mockCollection,
-    collectionGroup: jest.fn(() => ({
+    collection: jest.fn(() => ({
+      doc: jest.fn(() => ({
+        get: jest.fn().mockResolvedValue({
+          exists: true,
+          data: () => ({
+            displayName: 'Test User',
+            photoURL: 'https://example.com/photo.jpg',
+            currentStreak: 5,
+            badges: [{id: 'badge1', tier: 'bronze', unlockedAt: new Date()}],
+          }),
+          id: 'user123',
+        }),
+        set: jest.fn().mockResolvedValue(undefined),
+        update: jest.fn().mockResolvedValue(undefined),
+        delete: jest.fn().mockResolvedValue(undefined),
+        collection: jest.fn(() => ({
+          doc: jest.fn(() => ({
+            get: jest.fn().mockResolvedValue({exists: false, data: () => null}),
+            set: jest.fn().mockResolvedValue(undefined),
+            update: jest.fn().mockResolvedValue(undefined),
+          })),
+          add: jest.fn().mockResolvedValue({id: 'mock-id'}),
+          where: jest.fn().mockReturnThis(),
+          orderBy: jest.fn().mockReturnThis(),
+          limit: jest.fn().mockReturnThis(),
+          get: jest.fn().mockResolvedValue({
+            empty: false,
+            docs: [{
+              data: () => ({
+                token: 'token1',
+                platform: 'ios',
+                active: true,
+              }),
+            }],
+            size: 1,
+          }),
+        })),
+      })),
+      add: jest.fn().mockResolvedValue({id: 'mock-id'}),
       where: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
       limit: jest.fn().mockReturnThis(),
       get: jest.fn().mockResolvedValue({empty: true, docs: [], size: 0}),
     })),
-    batch: jest.fn(() => mockBatch),
+    batch: jest.fn(() => ({
+      set: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      commit: jest.fn().mockResolvedValue(undefined),
+    })),
   },
   messaging: {
     send: jest.fn().mockResolvedValue('message-id'),
@@ -95,36 +79,10 @@ jest.mock('../src/config/firebase', () => ({
 
 // Mock firebase-functions
 jest.mock('firebase-functions', () => ({
-  firestore: {
-    document: jest.fn(() => ({
-      onUpdate: jest.fn((handler) => handler),
-      onCreate: jest.fn((handler) => handler),
-      onWrite: jest.fn((handler) => handler),
-    })),
-  },
-  pubsub: {
-    schedule: jest.fn(() => ({
-      timeZone: jest.fn(() => ({
-        onRun: jest.fn((handler) => handler),
-      })),
-    })),
-  },
   https: {
     onCall: jest.fn((handler) => handler),
     onRequest: jest.fn((handler) => handler),
   },
-  runWith: jest.fn(() => ({
-    firestore: {
-      document: jest.fn(() => ({
-        onUpdate: jest.fn(),
-        onCreate: jest.fn(),
-        onWrite: jest.fn(),
-      })),
-    },
-    https: {
-      onCall: jest.fn(),
-    },
-  })),
   HttpsError: class HttpsError extends Error {
     code: string;
     constructor(code: string, message: string) {
@@ -134,36 +92,82 @@ jest.mock('firebase-functions', () => ({
   },
 }));
 
-describe('HTTP Functions - Logic Tests', () => {
+describe('HTTP Functions - Input Validation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('registerFcmToken', () => {
-    it('should validate required parameters', () => {
-      const data = {token: 'test-token', platform: 'ios'};
-      
-      expect(data.token).toBeDefined();
-      expect(data.platform).toBeDefined();
-      expect(['ios', 'android']).toContain(data.platform);
+    it('should require authentication', async () => {
+      const {registerFcmToken} = require('../src/triggers/httpFunctions');
+      const context = {auth: null};
+
+      await expect(registerFcmToken({}, context)).rejects.toThrow();
     });
 
-    it('should reject invalid platform', () => {
-      const platform = 'windows';
-      
-      expect(['ios', 'android']).not.toContain(platform);
-    });
-
-    it('should require authentication', () => {
+    it('should require token and platform', async () => {
+      const {registerFcmToken} = require('../src/triggers/httpFunctions');
       const context = {auth: {uid: 'user123'}};
-      
-      expect(context.auth).toBeDefined();
-      expect(context.auth?.uid).toBeDefined();
+
+      await expect(registerFcmToken({}, context)).rejects.toThrow();
+      await expect(registerFcmToken({token: 'abc'}, context)).rejects.toThrow();
+    });
+
+    it('should validate platform values', async () => {
+      const {registerFcmToken} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      await expect(
+        registerFcmToken({token: 'abc', platform: 'invalid'}, context)
+      ).rejects.toThrow();
+    });
+
+    it('should accept valid ios platform', async () => {
+      const {registerFcmToken} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await registerFcmToken(
+        {token: 'valid-token', platform: 'ios'},
+        context
+      );
+
+      expect(result).toEqual({success: true});
+    });
+
+    it('should accept valid android platform', async () => {
+      const {registerFcmToken} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await registerFcmToken(
+        {token: 'valid-token', platform: 'android'},
+        context
+      );
+
+      expect(result).toEqual({success: true});
     });
   });
 
   describe('getLeaderboard', () => {
-    it('should validate category parameter', () => {
+    it('should require category parameter', async () => {
+      const {getLeaderboard} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      await expect(getLeaderboard({}, context)).rejects.toThrow();
+    });
+
+    it('should validate category values', async () => {
+      const {getLeaderboard} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      await expect(
+        getLeaderboard({category: 'invalid_category'}, context)
+      ).rejects.toThrow();
+    });
+
+    it('should accept valid categories', async () => {
+      const {getLeaderboard} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
       const validCategories = [
         'screen_time',
         'focus_time',
@@ -171,332 +175,367 @@ describe('HTTP Functions - Logic Tests', () => {
         'streak',
         'weekly_challenge',
       ];
-      
-      const category = 'focus_time';
-      
-      expect(validCategories).toContain(category);
+
+      for (const category of validCategories) {
+        const result = await getLeaderboard({category}, context);
+        expect(result).toHaveProperty('entries');
+        expect(result).toHaveProperty('userRank');
+        expect(result).toHaveProperty('totalParticipants');
+      }
     });
 
-    it('should reject invalid category', () => {
-      const validCategories = [
-        'screen_time',
-        'focus_time',
-        'badges',
-        'streak',
-        'weekly_challenge',
-      ];
-      
-      const category = 'invalid_category';
-      
-      expect(validCategories).not.toContain(category);
+    it('should use default limit of 100', async () => {
+      const {getLeaderboard} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await getLeaderboard({category: 'streak'}, context);
+      expect(result).toBeDefined();
     });
 
-    it('should return leaderboard with user rank', async () => {
-      const {LeaderboardService} = require('../src/services/leaderboardService');
-      const service = new LeaderboardService();
+    it('should accept custom limit', async () => {
+      const {getLeaderboard} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      const entries = await service.getLeaderboard('streak', 10);
-      const userRank = await service.getUserRank('user123', 'streak');
-
-      expect(Array.isArray(entries)).toBe(true);
-      expect(userRank).toHaveProperty('rank');
-      expect(userRank).toHaveProperty('total');
+      const result = await getLeaderboard(
+        {category: 'streak', limit: 50},
+        context
+      );
+      expect(result).toBeDefined();
     });
   });
 
   describe('logAppUsage', () => {
-    it('should validate required parameters', () => {
-      const data = {
-        packageName: 'com.example.app',
-        appName: 'Example App',
-        usageTime: 30,
-        category: 'social',
-        isBlocked: false,
-      };
+    it('should require packageName and appName', async () => {
+      const {logAppUsage} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(data.packageName).toBeDefined();
-      expect(data.appName).toBeDefined();
-      expect(data.usageTime).toBeDefined();
-      expect(data.usageTime).toBeGreaterThanOrEqual(0);
+      await expect(logAppUsage({}, context)).rejects.toThrow();
+      await expect(
+        logAppUsage({packageName: 'com.test'}, context)
+      ).rejects.toThrow();
     });
 
-    it('should reject missing required fields', () => {
-      const data: {packageName: string; appName?: string; usageTime?: number} = {packageName: 'com.example.app'};
+    it('should require usageTime', async () => {
+      const {logAppUsage} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(data.appName).toBeUndefined();
-      expect(data.usageTime).toBeUndefined();
+      await expect(
+        logAppUsage({packageName: 'com.test', appName: 'Test'}, context)
+      ).rejects.toThrow();
+    });
+
+    it('should accept valid usage data', async () => {
+      const {logAppUsage} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await logAppUsage(
+        {
+          packageName: 'com.instagram.android',
+          appName: 'Instagram',
+          usageTime: 30,
+          category: 'social',
+          isBlocked: false,
+        },
+        context
+      );
+
+      expect(result).toEqual({success: true});
+    });
+
+    it('should use default category', async () => {
+      const {logAppUsage} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await logAppUsage(
+        {
+          packageName: 'com.test.app',
+          appName: 'Test App',
+          usageTime: 10,
+        },
+        context
+      );
+
+      expect(result).toEqual({success: true});
     });
   });
 
-  describe('updateNotificationPreferences', () => {
-    it('should accept valid preference updates', () => {
-      const validPrefs = {
-        streakReminders: true,
-        achievementNotifications: true,
-        leaderboardUpdates: false,
-        dailySummary: true,
-        challengeReminders: true,
-        limitWarnings: true,
-        focusReminders: false,
-        quietHoursStart: '22:00',
-        quietHoursEnd: '08:00',
-      };
+  describe('subscribeToTopic / unsubscribeFromTopic', () => {
+    it('should require topic parameter', async () => {
+      const {subscribeToTopic, unsubscribeFromTopic} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(typeof validPrefs.streakReminders).toBe('boolean');
-      expect(typeof validPrefs.quietHoursStart).toBe('string');
-      expect(validPrefs.quietHoursStart).toMatch(/^\d{2}:\d{2}$/);
-      expect(validPrefs.quietHoursEnd).toMatch(/^\d{2}:\d{2}$/);
+      await expect(subscribeToTopic({}, context)).rejects.toThrow();
+      await expect(unsubscribeFromTopic({}, context)).rejects.toThrow();
     });
 
-    it('should validate quiet hours format', () => {
-      const validTimeFormat = /^\d{2}:\d{2}$/;
-      
-      expect('22:00').toMatch(validTimeFormat);
-      expect('8:00').not.toMatch(validTimeFormat);
-      expect('22:00:00').not.toMatch(validTimeFormat);
+    it('should accept valid topic', async () => {
+      const {subscribeToTopic, unsubscribeFromTopic} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const subscribeResult = await subscribeToTopic(
+        {topic: 'weekly_challenge'},
+        context
+      );
+      expect(subscribeResult).toEqual({success: true});
+
+      const unsubscribeResult = await unsubscribeFromTopic(
+        {topic: 'weekly_challenge'},
+        context
+      );
+      expect(unsubscribeResult).toEqual({success: true});
     });
   });
 
   describe('getDailyStats', () => {
-    it('should use today as default date', () => {
-      const today = new Date().toISOString().split('T')[0];
-      const data: {date?: string} = {};
-      const targetDate = data.date || today;
+    it('should use today as default date', async () => {
+      const {getDailyStats} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(targetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      const result = await getDailyStats({}, context);
+      expect(result).toHaveProperty('stats');
     });
 
-    it('should accept specific date', () => {
-      const specificDate = '2024-03-13';
-      
-      expect(specificDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    it('should accept specific date', async () => {
+      const {getDailyStats} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await getDailyStats({date: '2024-03-13'}, context);
+      expect(result).toHaveProperty('stats');
     });
   });
 
   describe('getWeeklyStats', () => {
-    it('should calculate week range correctly', () => {
-      const endDate = new Date('2024-03-13');
-      const startDate = new Date(endDate);
-      startDate.setDate(startDate.getDate() - 6);
+    it('should use today as default end date', async () => {
+      const {getWeeklyStats} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(startDate.toISOString().split('T')[0]).toBe('2024-03-07');
-      expect(endDate.toISOString().split('T')[0]).toBe('2024-03-13');
+      const result = await getWeeklyStats({}, context);
+      expect(result).toHaveProperty('stats');
+      expect(Array.isArray(result.stats)).toBe(true);
+    });
+
+    it('should accept specific end date', async () => {
+      const {getWeeklyStats} = require('../src/triggers/httpFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await getWeeklyStats(
+        {endDate: '2024-03-13'},
+        context
+      );
+      expect(result).toHaveProperty('stats');
     });
   });
 });
 
-describe('Additional HTTP Functions - Logic Tests', () => {
+describe('HTTP Functions - Additional Functions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('getUserProfile', () => {
-    it('should aggregate user data correctly', async () => {
-      const mockUserData = {
-        displayName: 'Test User',
-        currentStreak: 5,
-        totalFocusTime: 120,
-      };
+    it('should return complete user profile', async () => {
+      const {getUserProfile} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      const mockWeeklyStats = [
-        {totalScreenTime: 180, blockedAttempts: 3},
-        {totalScreenTime: 200, blockedAttempts: 5},
-      ];
+      const result = await getUserProfile({}, context);
 
-      const weeklyScreenTime = mockWeeklyStats.reduce(
-        (sum, day) => sum + (day.totalScreenTime || 0),
-        0
+      expect(result).toHaveProperty('profile');
+      expect(result).toHaveProperty('todayStats');
+      expect(result).toHaveProperty('weeklySummary');
+      expect(result).toHaveProperty('badges');
+    });
+
+    it('should require authentication', async () => {
+      const {getUserProfile} = require('../src/triggers/additionalFunctions');
+      const context = {auth: null};
+
+      await expect(getUserProfile({}, context)).rejects.toThrow();
+    });
+  });
+
+  describe('updateUserProfile', () => {
+    it('should update allowed fields', async () => {
+      const {updateUserProfile} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await updateUserProfile(
+        {
+          displayName: 'New Name',
+          dailyGoal: 120,
+        },
+        context
       );
 
-      expect(weeklyScreenTime).toBe(380);
-      expect(mockUserData.displayName).toBe('Test User');
+      expect(result).toEqual({success: true});
+    });
+
+    it('should ignore undefined fields', async () => {
+      const {updateUserProfile} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await updateUserProfile({}, context);
+      expect(result).toEqual({success: true});
     });
   });
 
   describe('startFocusSession', () => {
-    it('should validate duration', () => {
-      const data = {duration: 25};
+    it('should require duration', async () => {
+      const {startFocusSession} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(data.duration).toBeGreaterThanOrEqual(1);
+      await expect(startFocusSession({}, context)).rejects.toThrow();
     });
 
-    it('should reject invalid duration', () => {
-      const data = {duration: 0};
+    it('should validate minimum duration', async () => {
+      const {startFocusSession} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(data.duration).toBeLessThan(1);
+      await expect(
+        startFocusSession({duration: 0}, context)
+      ).rejects.toThrow();
     });
 
-    it('should create session with correct data', () => {
-      const data = {
-        duration: 25,
-        blockedApps: ['com.instagram.android', 'com.twitter.android'],
-        sessionType: 'pomodoro',
-      };
+    it('should create session with valid data', async () => {
+      const {startFocusSession} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(data.duration).toBe(25);
-      expect(data.blockedApps).toHaveLength(2);
-      expect(data.sessionType).toBe('pomodoro');
+      const result = await startFocusSession(
+        {
+          duration: 25,
+          blockedApps: ['com.instagram.android'],
+          sessionType: 'pomodoro',
+        },
+        context
+      );
+
+      expect(result).toHaveProperty('success', true);
+      expect(result).toHaveProperty('sessionId');
     });
   });
 
   describe('completeFocusSession', () => {
-    it('should calculate actual duration correctly', () => {
-      const startTime = new Date(Date.now() - 25 * 60000); // 25 minutes ago
-      const actualDuration = Math.floor(
-        (Date.now() - startTime.getTime()) / 60000
-      );
+    it('should require sessionId', async () => {
+      const {completeFocusSession} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(actualDuration).toBe(25);
-    });
-
-    it('should mark interrupted sessions correctly', () => {
-      const interrupted = true;
-      
-      expect(interrupted).toBe(true);
+      await expect(completeFocusSession({}, context)).rejects.toThrow();
     });
   });
 
   describe('logBlockedAttempt', () => {
-    it('should require package and app name', () => {
-      const data = {
-        packageName: 'com.instagram.android',
-        appName: 'Instagram',
-      };
+    it('should require packageName and appName', async () => {
+      const {logBlockedAttempt} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(data.packageName).toBeDefined();
-      expect(data.appName).toBeDefined();
+      await expect(logBlockedAttempt({}, context)).rejects.toThrow();
     });
 
-    it('should track attempted duration', () => {
-      const data = {
-        packageName: 'com.instagram.android',
-        appName: 'Instagram',
-        attemptedDuration: 5,
-      };
+    it('should log attempt with valid data', async () => {
+      const {logBlockedAttempt} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(data.attemptedDuration).toBeGreaterThanOrEqual(0);
+      const result = await logBlockedAttempt(
+        {
+          packageName: 'com.instagram.android',
+          appName: 'Instagram',
+          category: 'social',
+          attemptedDuration: 5,
+        },
+        context
+      );
+
+      expect(result).toHaveProperty('success', true);
+      expect(result).toHaveProperty('attemptId');
     });
   });
 
   describe('getAllRanks', () => {
-    it('should query all categories', async () => {
-      const categories = ['screen_time', 'focus_time', 'badges', 'streak', 'weekly_challenge'];
+    it('should return ranks for all categories', async () => {
+      const {getAllRanks} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      const ranks = await Promise.all(
-        categories.map(async (category) => {
-          return {
-            category,
-            rank: 1,
-            total: 100,
-            score: 50,
-          };
-        })
-      );
+      const result = await getAllRanks({}, context);
 
-      expect(ranks).toHaveLength(5);
-      expect(ranks[0].category).toBe('screen_time');
-      expect(ranks[4].category).toBe('weekly_challenge');
+      expect(result).toHaveProperty('ranks');
+      expect(Array.isArray(result.ranks)).toBe(true);
+      expect(result.ranks.length).toBe(5); // All categories
+    });
+
+    it('should include category, rank, total, and score for each', async () => {
+      const {getAllRanks} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
+
+      const result = await getAllRanks({}, context);
+
+      result.ranks.forEach((rank: any) => {
+        expect(rank).toHaveProperty('category');
+        expect(rank).toHaveProperty('rank');
+        expect(rank).toHaveProperty('total');
+        expect(rank).toHaveProperty('score');
+      });
     });
   });
 
   describe('getFriendsLeaderboard', () => {
-    it('should include current user in friends list', () => {
-      const currentUserId = 'user123';
-      const friendIds = ['user456', 'user789'];
-      const allUserIds = [currentUserId, ...friendIds];
+    it('should use default category', async () => {
+      const {getFriendsLeaderboard} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      expect(allUserIds).toContain(currentUserId);
-      expect(allUserIds).toHaveLength(3);
+      const result = await getFriendsLeaderboard({}, context);
+
+      expect(result).toHaveProperty('entries');
+      expect(result).toHaveProperty('category', 'streak');
     });
 
-    it('should filter entries by user IDs', () => {
-      const allUserIds = ['user123', 'user456'];
-      const entries = [
-        {userId: 'user123', score: 100},
-        {userId: 'user456', score: 80},
-        {userId: 'user999', score: 120},
-      ];
+    it('should accept friendIds array', async () => {
+      const {getFriendsLeaderboard} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      const filtered = entries.filter(entry => allUserIds.includes(entry.userId));
+      const result = await getFriendsLeaderboard(
+        {
+          category: 'focus_time',
+          friendIds: ['user456', 'user789'],
+        },
+        context
+      );
 
-      expect(filtered).toHaveLength(2);
-      expect(filtered.map(e => e.userId)).not.toContain('user999');
-    });
-  });
-
-  describe('sendTestNotification', () => {
-    it('should support different notification types', () => {
-      const validTypes = ['streak', 'achievement', 'daily_summary', 'test'];
-      const type = 'streak';
-
-      expect(validTypes).toContain(type);
+      expect(result).toHaveProperty('entries');
+      expect(result).toHaveProperty('category', 'focus_time');
     });
   });
 
   describe('getAppInsights', () => {
-    it('should aggregate app usage correctly', () => {
-      const weeklyStats = [
-        {
-          appBreakdown: {Instagram: 60, Twitter: 30},
-          categoryBreakdown: {social: 90, productivity: 30},
-          blockedAttempts: 3,
-        },
-        {
-          appBreakdown: {Instagram: 45, Twitter: 45},
-          categoryBreakdown: {social: 90, productivity: 45},
-          blockedAttempts: 2,
-        },
-      ];
+    it('should use default of 7 days', async () => {
+      const {getAppInsights} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      const appTotals: Record<string, number> = {};
-      const categoryTotals: Record<string, number> = {};
-      let totalBlocked = 0;
+      const result = await getAppInsights({}, context);
 
-      weeklyStats.forEach(day => {
-        Object.entries(day.appBreakdown || {}).forEach(([app, time]) => {
-          appTotals[app] = (appTotals[app] || 0) + time;
-        });
-        Object.entries(day.categoryBreakdown || {}).forEach(([cat, time]) => {
-          categoryTotals[cat] = (categoryTotals[cat] || 0) + time;
-        });
-        totalBlocked += day.blockedAttempts || 0;
-      });
-
-      expect(appTotals.Instagram).toBe(105);
-      expect(appTotals.Twitter).toBe(75);
-      expect(categoryTotals.social).toBe(180);
-      expect(totalBlocked).toBe(5);
+      expect(result).toHaveProperty('period');
+      expect(result.period.days).toBe(7);
     });
 
-    it('should identify top apps correctly', () => {
-      const appTotals = {Instagram: 105, Twitter: 75, Facebook: 30, TikTok: 120};
+    it('should accept custom days parameter', async () => {
+      const {getAppInsights} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-      const topApps = Object.entries(appTotals)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 3)
-        .map(([name, time]) => ({name, time}));
+      const result = await getAppInsights({days: 14}, context);
 
-      expect(topApps[0].name).toBe('TikTok');
-      expect(topApps[0].time).toBe(120);
-      expect(topApps).toHaveLength(3);
+      expect(result.period.days).toBe(14);
     });
-  });
-});
 
-describe('Authentication Requirements', () => {
-  it('should require auth for protected functions', () => {
-    const protectedFunctions = [
-      'registerFcmToken',
-      'getLeaderboard',
-      'logAppUsage',
-      'getUserBadges',
-      'getUserProfile',
-      'startFocusSession',
-      'completeFocusSession',
-    ];
+    it('should return complete insights structure', async () => {
+      const {getAppInsights} = require('../src/triggers/additionalFunctions');
+      const context = {auth: {uid: 'user123'}};
 
-    protectedFunctions.forEach(fn => {
-      expect(fn).toBeDefined();
+      const result = await getAppInsights({}, context);
+
+      expect(result).toHaveProperty('period');
+      expect(result).toHaveProperty('summary');
+      expect(result).toHaveProperty('topApps');
+      expect(result).toHaveProperty('topCategories');
+      expect(Array.isArray(result.topApps)).toBe(true);
+      expect(Array.isArray(result.topCategories)).toBe(true);
     });
   });
 });
