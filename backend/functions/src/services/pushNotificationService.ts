@@ -173,9 +173,10 @@ export class PushNotificationService {
       await this.logNotification(userId, payload, response.successCount > 0);
 
       return {success: response.successCount > 0};
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending notification:', error);
-      return {success: false, error: error.message};
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return {success: false, error: message};
     }
   }
 
@@ -249,9 +250,10 @@ export class PushNotificationService {
 
       await messaging.send(message);
       return {success: true};
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending topic notification:', error);
-      return {success: false, error: error.message};
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return {success: false, error: message};
     }
   }
 

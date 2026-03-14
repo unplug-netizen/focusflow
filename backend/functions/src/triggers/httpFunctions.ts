@@ -49,9 +49,10 @@ export const registerFcmToken = functions.https.onCall(async (data, context) => 
       platform
     );
     return {success: true};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error registering token:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -78,9 +79,10 @@ export const unregisterFcmToken = functions.https.onCall(async (data, context) =
   try {
     await pushNotificationService.unregisterToken(context.auth.uid, token);
     return {success: true};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error unregistering token:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -131,9 +133,10 @@ export const getLeaderboard = functions.https.onCall(async (data, context) => {
       userRank: userRank.rank,
       totalParticipants: userRank.total,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting leaderboard:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -167,9 +170,10 @@ export const logAppUsage = functions.https.onCall(async (data, context) => {
     });
 
     return {success: true};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error logging app usage:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -187,9 +191,10 @@ export const getUserBadges = functions.https.onCall(async (data, context) => {
   try {
     const badges = await badgeSystem.getBadgeProgress(context.auth.uid);
     return {badges};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting user badges:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -207,9 +212,10 @@ export const checkBadges = functions.https.onCall(async (data, context) => {
   try {
     const newBadges = await badgeSystem.checkAndAwardBadges(context.auth.uid);
     return {newBadges};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error checking badges:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -236,9 +242,10 @@ export const subscribeToTopic = functions.https.onCall(async (data, context) => 
   try {
     await pushNotificationService.subscribeToTopic(context.auth.uid, topic);
     return {success: true};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error subscribing to topic:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -265,9 +272,10 @@ export const unsubscribeFromTopic = functions.https.onCall(async (data, context)
   try {
     await pushNotificationService.unsubscribeFromTopic(context.auth.uid, topic);
     return {success: true};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error unsubscribing from topic:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -319,9 +327,10 @@ export const updateNotificationPreferences = functions.https.onCall(
       );
 
       return {success: true};
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating preferences:', error);
-      throw new functions.https.HttpsError('internal', error.message);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      throw new functions.https.HttpsError('internal', message);
     }
   }
 );
@@ -346,9 +355,10 @@ export const getDailyStats = functions.https.onCall(async (data, context) => {
       targetDate
     );
     return {stats};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting daily stats:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -372,8 +382,9 @@ export const getWeeklyStats = functions.https.onCall(async (data, context) => {
       targetDate
     );
     return {stats};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting weekly stats:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });

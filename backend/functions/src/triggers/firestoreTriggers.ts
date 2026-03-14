@@ -49,7 +49,7 @@ export const onUserStatsUpdate = functions.firestore
         JSON.stringify(newData.badges) !== JSON.stringify(oldData.badges)
       ) {
         const badgeScore = (newData.badges || []).reduce(
-          (sum: number, badge: any) => {
+          (sum: number, badge: {unlockedAt?: Date; tier: string}) => {
             if (badge.unlockedAt) {
               const points: Record<string, number> = {
                 bronze: 10,
@@ -260,7 +260,7 @@ export const onUserCreate = functions.firestore
           maxProgress:
             badge.requirement.type === 'streak'
               ? badge.requirement.days
-              : (badge.requirement as any).minutes || 1,
+              : (badge.requirement as {minutes?: number}).minutes || 1,
         });
       }
       await batch.commit();

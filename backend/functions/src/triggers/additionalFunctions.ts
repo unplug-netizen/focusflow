@@ -70,9 +70,10 @@ export const getUserProfile = functions.https.onCall(async (data, context) => {
         progress: badges,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting user profile:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -90,7 +91,7 @@ export const updateUserProfile = functions.https.onCall(async (data, context) =>
   const {displayName, photoURL, dailyGoal, bedtime} = data;
 
   try {
-    const updateData: Record<string, any> = {
+    const updateData: Record<string, unknown> = {
       updatedAt: Timestamp.now(),
     };
 
@@ -102,9 +103,10 @@ export const updateUserProfile = functions.https.onCall(async (data, context) =>
     await db.collection('users').doc(context.auth.uid).update(updateData);
 
     return {success: true};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating profile:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -147,9 +149,10 @@ export const startFocusSession = functions.https.onCall(async (data, context) =>
       success: true,
       sessionId: sessionRef.id,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error starting focus session:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -213,9 +216,10 @@ export const completeFocusSession = functions.https.onCall(async (data, context)
       actualDuration,
       completed: !interrupted,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error completing focus session:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -262,9 +266,10 @@ export const logBlockedAttempt = functions.https.onCall(async (data, context) =>
       success: true,
       attemptId: attemptRef.id,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error logging blocked attempt:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -298,9 +303,10 @@ export const getAllRanks = functions.https.onCall(async (data, context) => {
     );
 
     return {ranks};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting ranks:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -336,9 +342,10 @@ export const getFriendsLeaderboard = functions.https.onCall(async (data, context
       entries: rankedEntries,
       category,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting friends leaderboard:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -384,9 +391,10 @@ export const sendTestNotification = functions.https.onCall(async (data, context)
     }
 
     return {success: true, type};
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending test notification:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
 
@@ -451,8 +459,9 @@ export const getAppInsights = functions.https.onCall(async (data, context) => {
       topApps,
       topCategories,
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error getting app insights:', error);
-    throw new functions.https.HttpsError('internal', error.message);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new functions.https.HttpsError('internal', message);
   }
 });
