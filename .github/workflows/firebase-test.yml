@@ -56,13 +56,19 @@ jobs:
           name: app-debug
           path: ./apk
 
-      - name: Create Service Account Key File
-        run: |
-          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/service-account.json
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
 
-      - name: Authenticate gcloud
-        run: |
-          gcloud auth activate-service-account --key-file=/tmp/service-account.json --project=${{ secrets.FIREBASE_PROJECT_ID }}
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+
+      - name: Verify gcloud auth
+        run: gcloud auth list
 
       - name: Install gcloud Firebase components
         run: gcloud components install beta --quiet
@@ -77,10 +83,6 @@ jobs:
             --device model=panther,version=34,locale=de_DE,orientation=portrait \
             --timeout 5m \
             --robo-directives=text:emailInput=test@example.com,text:passwordInput=test123
-
-      - name: Cleanup
-        if: always()
-        run: rm -f /tmp/service-account.json
 
       - name: Get test results URL
         run: |
