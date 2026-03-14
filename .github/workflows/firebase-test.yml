@@ -5,7 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
-  workflow_dispatch:  # Manuelles Triggern möglich
+  workflow_dispatch:
 
 jobs:
   build-android:
@@ -56,13 +56,13 @@ jobs:
           name: app-debug
           path: ./apk
 
-      - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          version: '>= 363.0.0'
-          project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
-          service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          export_default_credentials: true
+      - name: Create Service Account Key File
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/service-account.json
+
+      - name: Authenticate gcloud
+        run: |
+          gcloud auth activate-service-account --key-file=/tmp/service-account.json --project=${{ secrets.FIREBASE_PROJECT_ID }}
 
       - name: Install gcloud Firebase components
         run: gcloud components install beta --quiet
@@ -77,6 +77,10 @@ jobs:
             --device model=panther,version=34,locale=de_DE,orientation=portrait \
             --timeout 5m \
             --robo-directives=text:emailInput=test@example.com,text:passwordInput=test123
+
+      - name: Cleanup
+        if: always()
+        run: rm -f /tmp/service-account.json
 
       - name: Get test results URL
         run: |
@@ -93,13 +97,6 @@ jobs:
           echo "========================================"
           echo "  FocusFlow Firebase Test Lab Complete"
           echo "========================================"
-          echo ""
-          echo "Tests ran on:"
-          echo "  - Pixel 5 (Android 11)"
-          echo "  - Pixel 6 (Android 13)"
-          echo "  - Pixel 7 (Android 14)"
-          echo ""
-          echo "Free tier: 100 device-minutes/day"
           echo ""
           echo "Check results in Firebase Console:"
           echo "https://console.firebase.google.com/project/${{ secrets.FIREBASE_PROJECT_ID }}/testlab/histories"
