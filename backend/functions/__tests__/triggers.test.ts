@@ -167,8 +167,13 @@ describe('Firestore Triggers - Logic Tests', () => {
       const badgesChanged = JSON.stringify(afterBadges) !== JSON.stringify(beforeBadges);
       expect(badgesChanged).toBe(true);
 
+      interface BadgeData {
+        tier: string;
+        unlockedAt?: Date;
+      }
+
       // Calculate badge score
-      const badgeScore = (afterBadges || []).reduce((sum: number, badge: any) => {
+      const badgeScore = (afterBadges || []).reduce((sum: number, badge: BadgeData) => {
         if (badge.unlockedAt) {
           const points: Record<string, number> = {
             bronze: 10,
@@ -261,7 +266,13 @@ describe('Firestore Triggers - Logic Tests', () => {
 
       expect(badges.length).toBeGreaterThan(0);
 
-      badges.forEach((badge: any) => {
+      interface BadgeDef {
+        id: string;
+        progress?: number;
+        maxProgress?: number;
+      }
+
+      badges.forEach((badge: BadgeDef) => {
         expect(badge.id).toBeDefined();
         expect(badge.progress).toBeUndefined(); // Will be set to 0
         expect(badge.maxProgress).toBeUndefined(); // Will be set based on requirement

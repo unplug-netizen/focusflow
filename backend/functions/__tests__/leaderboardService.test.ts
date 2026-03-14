@@ -153,7 +153,12 @@ describe('LeaderboardService - Extended', () => {
         platinum: 100,
       };
 
-      const badgeScore = badges.reduce((sum: number, badge: any) => {
+      interface BadgeData {
+        tier: string;
+        unlockedAt: Date | null;
+      }
+
+      const badgeScore = badges.reduce((sum: number, badge: BadgeData) => {
         if (badge.unlockedAt) {
           return sum + (tierPoints[badge.tier] || 0);
         }
@@ -177,7 +182,12 @@ describe('LeaderboardService - Extended', () => {
         platinum: 100,
       };
 
-      const badgeScore = badges.reduce((sum: number, badge: any) => {
+      interface BadgeData {
+        tier: string;
+        unlockedAt: Date | null;
+      }
+
+      const badgeScore = badges.reduce((sum: number, badge: BadgeData) => {
         if (badge.unlockedAt) {
           return sum + (tierPoints[badge.tier] || 0);
         }

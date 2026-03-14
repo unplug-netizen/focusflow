@@ -169,7 +169,7 @@ describe('BadgeVerificationSystem - Extended', () => {
       expect(streakBadges.length).toBeGreaterThan(0);
       streakBadges.forEach(badge => {
         expect(badge.requirement).toHaveProperty('days');
-        expect((badge.requirement as any).days).toBeGreaterThan(0);
+        expect((badge.requirement as {days: number}).days).toBeGreaterThan(0);
       });
     });
 
@@ -211,7 +211,7 @@ describe('BadgeVerificationSystem - Extended', () => {
       expect(badge).toBeDefined();
       expect(badge!.name).toBe('Week Warrior');
       expect(badge!.tier).toBe('bronze');
-      expect((badge!.requirement as any).days).toBe(7);
+      expect((badge!.requirement as {days: number}).days).toBe(7);
     });
 
     it('should have Month Master badge (30-day streak)', () => {
@@ -220,7 +220,7 @@ describe('BadgeVerificationSystem - Extended', () => {
       expect(badge).toBeDefined();
       expect(badge!.name).toBe('Month Master');
       expect(badge!.tier).toBe('silver');
-      expect((badge!.requirement as any).days).toBe(30);
+      expect((badge!.requirement as {days: number}).days).toBe(30);
     });
 
     it('should have Centurion badge (100-day streak)', () => {
@@ -229,7 +229,7 @@ describe('BadgeVerificationSystem - Extended', () => {
       expect(badge).toBeDefined();
       expect(badge!.name).toBe('Centurion');
       expect(badge!.tier).toBe('gold');
-      expect((badge!.requirement as any).days).toBe(100);
+      expect((badge!.requirement as {days: number}).days).toBe(100);
     });
 
     it('should have Focus King badge (100 hours focus)', () => {
@@ -238,7 +238,7 @@ describe('BadgeVerificationSystem - Extended', () => {
       expect(badge).toBeDefined();
       expect(badge!.name).toBe('Focus King');
       expect(badge!.tier).toBe('platinum');
-      expect((badge!.requirement as any).minutes).toBe(6000); // 100 hours
+      expect((badge!.requirement as {minutes: number}).minutes).toBe(6000); // 100 hours
     });
 
     it('should have Digital Sabbath badge (24 hours offline)', () => {
@@ -246,7 +246,7 @@ describe('BadgeVerificationSystem - Extended', () => {
       
       expect(badge).toBeDefined();
       expect(badge!.name).toBe('Digital Sabbath');
-      expect((badge!.requirement as any).hours).toBe(24);
+      expect((badge!.requirement as {hours: number}).hours).toBe(24);
     });
   });
 
