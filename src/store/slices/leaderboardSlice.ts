@@ -55,7 +55,9 @@ export const updateLeaderboardScore = createAsyncThunk(
       const state = getState() as any;
       const userId = state.auth.user?.id;
 
-      if (!userId) return rejectWithValue("User not authenticated");
+      if (!userId) {
+        return rejectWithValue("User not authenticated");
+      }
 
       await firestore()
         .collection("leaderboard")

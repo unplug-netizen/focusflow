@@ -18,6 +18,7 @@ import {
   setCategory,
 } from "../store/slices/leaderboardSlice";
 import { LeaderboardCategory } from "../types";
+import { MOCK_LEADERBOARD } from "../__mocks__/leaderboardData";
 
 const CATEGORIES: { key: LeaderboardCategory; label: string; icon: string }[] =
   [
@@ -28,56 +29,7 @@ const CATEGORIES: { key: LeaderboardCategory; label: string; icon: string }[] =
     { key: "weekly_challenge", label: "Wochen-Challenge", icon: "⚡" },
   ];
 
-const MOCK_LEADERBOARD = [
-  {
-    rank: 1,
-    userId: "1",
-    displayName: "Sarah M.",
-    score: 12500,
-    streak: 45,
-    isCurrentUser: false,
-  },
-  {
-    rank: 2,
-    userId: "2",
-    displayName: "Max K.",
-    score: 11200,
-    streak: 32,
-    isCurrentUser: false,
-  },
-  {
-    rank: 3,
-    userId: "3",
-    displayName: "Lisa B.",
-    score: 10800,
-    streak: 28,
-    isCurrentUser: false,
-  },
-  {
-    rank: 4,
-    userId: "4",
-    displayName: "Tom H.",
-    score: 9500,
-    streak: 21,
-    isCurrentUser: false,
-  },
-  {
-    rank: 5,
-    userId: "5",
-    displayName: "Anna S.",
-    score: 8900,
-    streak: 18,
-    isCurrentUser: false,
-  },
-  {
-    rank: 12,
-    userId: "current",
-    displayName: "Du",
-    score: 5400,
-    streak: 7,
-    isCurrentUser: true,
-  },
-];
+// MOCK_LEADERBOARD moved to __mocks__/leaderboardData.ts
 
 export const LeaderboardScreen: React.FC = () => {
   const { theme } = useTheme();

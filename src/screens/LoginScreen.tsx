@@ -35,9 +35,9 @@ export const LoginScreen: React.FC = () => {
 
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const validateEmail = (email: string): boolean => {
+  const validateEmail = (emailValue: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return emailRegex.test(emailValue);
   };
 
   const handleEmailAuth = () => {

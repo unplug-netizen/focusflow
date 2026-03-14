@@ -40,7 +40,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({
     } else {
       animValue.setValue(percentage);
     }
-  }, [percentage, animated]);
+  }, [percentage, animated, animValue]);
 
   const [animatedWidth, setAnimatedWidth] = React.useState<number>(percentage);
 

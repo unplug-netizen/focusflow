@@ -35,7 +35,9 @@ export const Button: React.FC<ButtonProps> = ({
   const { theme } = useTheme();
 
   const getBackgroundColor = () => {
-    if (disabled) return theme.colors.border;
+    if (disabled) {
+      return theme.colors.border;
+    }
     switch (variant) {
       case "primary":
         return theme.colors.primary;
@@ -50,7 +52,9 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const getTextColor = () => {
-    if (disabled) return theme.colors.textSecondary;
+    if (disabled) {
+      return theme.colors.textSecondary;
+    }
     switch (variant) {
       case "primary":
       case "secondary":

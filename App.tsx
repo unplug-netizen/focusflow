@@ -1,40 +1,40 @@
-import React, { useEffect } from 'react';
-import { Text } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
-import { Provider, useDispatch, useSelector } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
-import { store, persistor, AppDispatch, RootState } from './src/store';
-import { signInAnonymously } from './src/store/slices/authSlice';
-import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
-import { ErrorBoundary } from './src/components';
+import React, { useEffect } from "react";
+import { Text } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { store, persistor, AppDispatch, RootState } from "./src/store";
+import { signInAnonymously } from "./src/store/slices/authSlice";
+import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
+import { ErrorBoundary } from "./src/components";
 
 // Screens
-import HomeScreen from './src/screens/HomeScreen';
-import AppBlockerScreen from './src/screens/AppBlockerScreen';
-import FocusModeScreen from './src/screens/FocusModeScreen';
-import StatsScreen from './src/screens/StatsScreen';
-import LeaderboardScreen from './src/screens/LeaderboardScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import LoginScreen from './src/screens/LoginScreen';
-import LoadingScreen from './src/screens/LoadingScreen';
+import HomeScreen from "./src/screens/HomeScreen";
+import AppBlockerScreen from "./src/screens/AppBlockerScreen";
+import FocusModeScreen from "./src/screens/FocusModeScreen";
+import StatsScreen from "./src/screens/StatsScreen";
+import LeaderboardScreen from "./src/screens/LeaderboardScreen";
+import ProfileScreen from "./src/screens/ProfileScreen";
+import LoginScreen from "./src/screens/LoginScreen";
+import LoadingScreen from "./src/screens/LoadingScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 // Tab bar icon component - defined outside of MainTabs to avoid re-render issues
-const TabIcon: React.FC<{ focused: boolean; icon: string; theme: any }> = ({
-  focused,
-  icon,
-  theme,
-}) => {
+const TabIcon: React.FC<{
+  focused: boolean;
+  icon: string;
+  colors: { primary: string; textSecondary: string };
+}> = ({ focused, icon, colors }) => {
   return (
     <Text
       style={{
         fontSize: focused ? 24 : 20,
         opacity: focused ? 1 : 0.6,
-        color: focused ? theme.colors.primary : theme.colors.textSecondary,
+        color: focused ? colors.primary : colors.textSecondary,
       }}
     >
       {icon}
@@ -60,7 +60,7 @@ function MainTabs() {
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: "500",
         },
       }}
     >
@@ -68,40 +68,50 @@ function MainTabs() {
         name="Home"
         component={HomeScreen}
         options={{
-          tabBarLabel: 'Home',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="🏠" theme={theme} />,
+          tabBarLabel: "Home",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon="🏠" colors={theme.colors} />
+          ),
         }}
       />
       <Tab.Screen
         name="Blocker"
         component={AppBlockerScreen}
         options={{
-          tabBarLabel: 'Blocker',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="🚫" theme={theme} />,
+          tabBarLabel: "Blocker",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon="🚫" colors={theme.colors} />
+          ),
         }}
       />
       <Tab.Screen
         name="Focus"
         component={FocusModeScreen}
         options={{
-          tabBarLabel: 'Fokus',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="🎯" theme={theme} />,
+          tabBarLabel: "Fokus",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon="🎯" colors={theme.colors} />
+          ),
         }}
       />
       <Tab.Screen
         name="Stats"
         component={StatsScreen}
         options={{
-          tabBarLabel: 'Stats',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="📊" theme={theme} />,
+          tabBarLabel: "Stats",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon="📊" colors={theme.colors} />
+          ),
         }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          tabBarLabel: 'Profil',
-          tabBarIcon: ({ focused }) => <TabIcon focused={focused} icon="👤" theme={theme} />,
+          tabBarLabel: "Profil",
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon="👤" colors={theme.colors} />
+          ),
         }}
       />
     </Tab.Navigator>
@@ -145,7 +155,7 @@ function AppContent(): React.JSX.Element {
             name="Leaderboard"
             component={LeaderboardScreen}
             options={{
-              presentation: 'modal',
+              presentation: "modal",
             }}
           />
         </Stack.Navigator>

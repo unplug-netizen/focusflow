@@ -221,7 +221,9 @@ export const PieChart: React.FC<PieChartProps> = ({
         {/* Simple pie chart using conic gradient approximation */}
         {segments.length > 1 &&
           segments.map((segment, index) => {
-            if (index === 0) return null;
+            if (index === 0) {
+              return null;
+            }
             return (
               <View
                 key={index}
