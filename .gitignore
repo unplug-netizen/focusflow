@@ -5,6 +5,12 @@ backend/functions/node_modules/
 # Build output
 backend/functions/lib/
 *.js.map
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/.cxx/
+android/app/debug.keystore
 
 # Environment variables
 .env
@@ -32,3 +38,9 @@ coverage/
 # Firebase
 .firebase/
 .firebaserc
+
+# Test results
+test-results/
+
+# Service account (sensitive)
+service-account.json
