@@ -27,14 +27,15 @@ const Stack = createStackNavigator();
 const TabIcon: React.FC<{
   focused: boolean;
   icon: string;
-  colors: { primary: string; textSecondary: string };
-}> = ({ focused, icon, colors }) => {
+  primaryColor: string;
+  textSecondaryColor: string;
+}> = ({ focused, icon, primaryColor, textSecondaryColor }) => {
   return (
     <Text
       style={{
         fontSize: focused ? 24 : 20,
         opacity: focused ? 1 : 0.6,
-        color: focused ? colors.primary : colors.textSecondary,
+        color: focused ? primaryColor : textSecondaryColor,
       }}
     >
       {icon}
@@ -70,7 +71,12 @@ function MainTabs() {
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="🏠" colors={theme.colors} />
+            <TabIcon
+              focused={focused}
+              icon="🏠"
+              primaryColor={theme.colors.primary}
+              textSecondaryColor={theme.colors.textSecondary}
+            />
           ),
         }}
       />
@@ -80,7 +86,12 @@ function MainTabs() {
         options={{
           tabBarLabel: "Blocker",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="🚫" colors={theme.colors} />
+            <TabIcon
+              focused={focused}
+              icon="🚫"
+              primaryColor={theme.colors.primary}
+              textSecondaryColor={theme.colors.textSecondary}
+            />
           ),
         }}
       />
@@ -90,7 +101,12 @@ function MainTabs() {
         options={{
           tabBarLabel: "Fokus",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="🎯" colors={theme.colors} />
+            <TabIcon
+              focused={focused}
+              icon="🎯"
+              primaryColor={theme.colors.primary}
+              textSecondaryColor={theme.colors.textSecondary}
+            />
           ),
         }}
       />
@@ -100,7 +116,12 @@ function MainTabs() {
         options={{
           tabBarLabel: "Stats",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="📊" colors={theme.colors} />
+            <TabIcon
+              focused={focused}
+              icon="📊"
+              primaryColor={theme.colors.primary}
+              textSecondaryColor={theme.colors.textSecondary}
+            />
           ),
         }}
       />
@@ -110,7 +131,12 @@ function MainTabs() {
         options={{
           tabBarLabel: "Profil",
           tabBarIcon: ({ focused }) => (
-            <TabIcon focused={focused} icon="👤" colors={theme.colors} />
+            <TabIcon
+              focused={focused}
+              icon="👤"
+              primaryColor={theme.colors.primary}
+              textSecondaryColor={theme.colors.textSecondary}
+            />
           ),
         }}
       />
