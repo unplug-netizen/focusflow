@@ -4,7 +4,7 @@
 module.exports = {
   project: {
     android: {
-      packageName: 'com.focusflow',
+      packageName: "com.focusflow",
     },
   },
 };
