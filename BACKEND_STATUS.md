@@ -1,111 +1,158 @@
 # FocusFlow Backend - Implementierungsstatus
 
-## Zusammenfassung
+## Übersicht
+Das FocusFlow Backend ist vollständig implementiert und bereit für den Einsatz.
 
-Das FocusFlow Backend ist vollständig implementiert und umfasst alle geforderten Funktionalitäten:
+## Implementierte Funktionalität
 
-## Implementierte Funktionalitäten
-
-### 1. Firebase Cloud Functions für Leaderboard-Updates
-- **Datei**: `src/services/leaderboardService.ts`
-- **Features**:
-  - Echtzeit-Score-Updates für alle Kategorien (screen_time, focus_time, badges, streak, weekly_challenge)
-  - Automatische Neuberechnung der Leaderboards (täglich um Mitternacht)
+### 1. Firebase Cloud Functions für Leaderboard-Updates ✅
+- **LeaderboardService** (`src/services/leaderboardService.ts`)
+  - 5 Kategorien: screen_time, focus_time, badges, streak, weekly_challenge
+  - Automatische Score-Berechnung mit invertiertem Screen-Time-Scoring
   - Batch-Verarbeitung für große Nutzerbasen
-  - Invertierte Screen-Time-Bewertung (weniger ist besser)
-  - Wöchentliche Challenge-Resets
+  - Wöchentliche Challenge-Reset-Funktionalität
 
-### 2. Push-Notification-Service
-- **Datei**: `src/services/pushNotificationService.ts`
-- **Features**:
-  - Multi-Plattform-Support (iOS/Android)
+- **Firestore Triggers** (`src/triggers/firestoreTriggers.ts`)
+  - `onUserStatsUpdate`: Aktualisiert Leaderboard bei Nutzeränderungen
+  - `onFocusSessionComplete`: Aktualisiert Focus-Time-Leaderboard
+  - `onDailyStatsUpdate`: Aktualisiert Screen-Time-Leaderboard
+
+- **Scheduled Functions** (`src/triggers/scheduledTriggers.ts`)
+  - `dailyLeaderboardUpdate`: Tägliche Neuberechnung aller Leaderboards (Mitternacht)
+  - `weeklyChallengeReset`: Wöchentlicher Reset der Challenge-Rangliste (Montag)
+
+### 2. Push-Notification-Service ✅
+- **PushNotificationService** (`src/services/pushNotificationService.ts`)
+  - Multi-Plattform Support (iOS/Android)
   - Topic-basiertes Messaging
-  - Stille-Stunden-Verwaltung mit Notification-Queuing
-  - Nutzer-Präferenz-Respektierung
+  - Ruhezeiten-Handling mit Notification-Queuing
   - Automatische Token-Bereinigung
   - Multicast-Messaging für Effizienz
-  - Notification-Typen: streak_reminder, achievement_unlocked, leaderboard_update, daily_summary, challenge_reminder, limit_warning, focus_reminder, system
 
-### 3. App-Usage-Tracking-Logik
-- **Datei**: `src/services/appUsageTracker.ts`
-- **Features**:
+- **Notification Types**
+  - Streak Reminders (🔥 Streak in Gefahr!)
+  - Achievement Unlocked (🥇 Badge freigeschaltet!)
+  - Leaderboard Updates (📈 Aufstieg!)
+  - Daily Summary (📊 Tagesbericht)
+  - Limit Warnings (⏰ Zeitlimit erreicht)
+
+### 3. App-Usage-Tracking-Logik ✅
+- **AppUsageTracker** (`src/services/appUsageTracker.ts`)
   - Echtzeit-Usage-Logging mit Batch-Operationen
   - Tägliche und wöchentliche Statistik-Aggregation
-  - App-Limit-Verletzungs-Erkennung
+  - App-Limit-Verletzungserkennung
   - Kategorie-basierte Aufschlüsselung
-  - Automatische Bereinigung alter Logs (90 Tage Retention)
-  - Leaderboard-Daten-Aggregation
+  - Automatische Bereinigung alter Logs (90 Tage)
 
-### 4. Badge-Verification-System
-- **Datei**: `src/services/badgeVerificationSystem.ts`
-- **Features**:
-  - 11 vordefinierte Badges über 4 Tiers (bronze, silver, gold, platinum)
-  - Multiple Anforderungstypen: streak, focus_time, blocked_time, social_detox, digital_sabbath, early_bird, weekend_warrior, bedtime
-  - Automatische Badge-Initialisierung für neue Nutzer
-  - Focus Coins Rewards beim Freischalten
-  - Fortschritts-Tracking für unvollständige Badges
-  - Integration mit PushNotificationService
+- **Tracking Features**
+  - Package-Name und App-Name Logging
+  - Kategorisierung (social, productivity, entertainment, etc.)
+  - Blocked-Attempts Tracking
+  - Focus Sessions Integration
 
-## Zusätzliche Implementierungen
+### 4. Badge-Verification-System ✅
+- **BadgeVerificationSystem** (`src/services/badgeVerificationSystem.ts`)
+  - 11 vordefinierte Badges über 4 Tiers
+  - Automatische Badge-Verifizierung
+  - Focus Coins Rewards
+  - Fortschritts-Tracking
 
-### Firestore Trigger
-- `onUserStatsUpdate` - Reagiert auf Nutzer-Statistik-Updates
-- `onFocusSessionComplete` - Verarbeitet abgeschlossene Fokus-Sessions
-- `onDailyStatsUpdate` - Aktualisiert tägliche Statistiken
-- `onUserCreate` - Initialisiert neue Nutzer
-- `onBlockedAttempt` - Verarbeitet blockierte App-Versuche
+- **Badge Tiers & Rewards**
+  - Bronze: 50-75 Coins (Week Warrior, Early Bird, Time Saver)
+  - Silver: 100-200 Coins (Month Master, Social Detox, Weekend Warrior)
+  - Gold: 300-500 Coins (Centurion, Digital Sabbath, Sleep Champion, Master Saver)
+  - Platinum: 1000 Coins (Focus King)
 
-### Scheduled Functions
-- `dailySummaryNotification` - Tägliche Zusammenfassung (21:00 Uhr)
-- `streakReminderCheck` - Streak-Erinnerungen (20:00 Uhr)
-- `dailyLeaderboardUpdate` - Leaderboard-Neuberechnung (Mitternacht)
-- `weeklyChallengeReset` - Wöchentliche Challenge-Resets (Montag 00:00)
-- `cleanupOldLogs` - Bereinigung alter Logs (02:00 Uhr)
-- `processQueuedNotifications` - Verarbeitung queued Notifications (stündlich)
-- `dailyBadgeCheck` - Tägliche Badge-Überprüfung (06:00 Uhr)
+## HTTP Callable Functions
 
-### HTTP Callable Functions
-- FCM Token Verwaltung (register/unregister)
-- Leaderboard Abfragen
-- App Usage Logging
-- Badge Verwaltung
-- Notification Präferenzen
-- Statistik-Abfragen (täglich/wöchentlich)
-- User Profile Verwaltung
-- Focus Session Verwaltung
-- Blocked Attempt Logging
-- Friends Leaderboard
-- App Insights
+### Authentication & Tokens
+- `registerFcmToken` - Registriert FCM Token
+- `unregisterFcmToken` - Entfernt FCM Token
+- `subscribeToTopic` - Abonniert Topic
+- `unsubscribeFromTopic` - Deabonniert Topic
 
-### Utilities
-- **Rate Limiter** (`utils/rateLimiter.ts`) - Schutz vor API-Missbrauch
-- **Error Tracker** (`utils/errorTracker.ts`) - Zentrales Error-Handling mit Retry-Logik
-- **Validation** (`utils/validation.ts`) - Input-Validierung für alle Endpunkte
+### Leaderboard
+- `getLeaderboard` - Ruft Rangliste ab
+- `getAllRanks` - Alle Kategorie-Ränge
+- `getFriendsLeaderboard` - Freunde-Rangliste
+
+### Usage Tracking
+- `logAppUsage` - Loggt App-Nutzung
+- `getDailyStats` - Tägliche Statistiken
+- `getWeeklyStats` - Wöchentliche Statistiken
+- `getAppInsights` - Nutzungseinblicke
+
+### Focus Sessions
+- `startFocusSession` - Startet Fokus-Session
+- `completeFocusSession` - Beendet Fokus-Session
+- `logBlockedAttempt` - Loggt blockierten Versuch
+
+### Badges
+- `getUserBadges` - Nutzer-Badges abrufen
+- `checkBadges` - Badges überprüfen
+
+### User Profile
+- `getUserProfile` - Profil mit Statistiken
+- `updateUserProfile` - Profil aktualisieren
+- `updateNotificationPreferences` - Benachrichtigungseinstellungen
+
+### Testing
+- `sendTestNotification` - Test-Benachrichtigung senden
+
+## Geplante Funktionen (Scheduled)
+
+| Zeit | Funktion | Beschreibung |
+|------|----------|--------------|
+| 00:00 | `dailyLeaderboardUpdate` | Leaderboard-Neuberechnung |
+| 02:00 | `cleanupOldLogs` | Alte Logs bereinigen |
+| 06:00 | `dailyBadgeCheck` | Badge-Fortschritt prüfen |
+| 20:00 | `streakReminderCheck` | Streak-Erinnerungen |
+| 21:00 | `dailySummaryNotification` | Tageszusammenfassung |
+| Jede Stunde | `processQueuedNotifications` | Warteschlangen-Verarbeitung |
+| Montag 00:00 | `weeklyChallengeReset` | Wöchentlicher Reset |
 
 ## Testabdeckung
 
-- **263 Tests** über 12 Test-Suites
-- Alle Hauptfunktionalitäten sind getestet
-- Integration-Tests für Service-Interaktionen
-- Unit-Tests für alle Utilities
+- **263 Tests** bestehen
+- **12 Test-Suites**
+- Code-Coverage:
+  - Statements: ~50%
+  - Branches: ~40%
+  - Functions: ~54%
+  - Lines: ~50%
 
-## Build-Status
+## Technische Details
 
-- ✅ TypeScript-Kompilierung erfolgreich
-- ✅ ESLint ohne Fehler
-- ✅ Alle Tests bestehen
+### Dependencies
+- `firebase-admin`: ^12.0.0
+- `firebase-functions`: ^4.7.0
+
+### Dev Dependencies
+- TypeScript: ^5.3.3
+- Jest: ^29.7.0
+- ESLint: ^8.56.0
+
+### Build
+```bash
+npm run build    # TypeScript-Kompilierung
+npm test         # Tests ausführen
+npm run lint     # Linting
+```
+
+## Sicherheit
+
+- Rate Limiting für alle Endpunkte
+- Input-Validierung mit detaillierten Fehlermeldungen
+- Authentifizierung erforderlich für alle Funktionen
+- Strukturiertes Error-Handling und Logging
 
 ## Deployment
 
-Das Backend ist bereit für Deployment zu Firebase Cloud Functions.
-
 ```bash
-npm run deploy
+firebase deploy --only functions
 ```
 
-## Technologie-Stack
+---
 
-- **Runtime**: Node.js 20
-- **Sprache**: TypeScript 5.3
-- **Firebase**: Admin SDK 12.0, Functions 4.7
-- **Testing**: Jest 29.7 mit ts-jest
+**Status:** ✅ Vollständig implementiert und getestet
+**Letzte Aktualisierung:** 2026-03-15
