@@ -4,16 +4,8 @@ module.exports = {
   env: {
     jest: true,
   },
+  ignorePatterns: ["lib/**/*.d.ts", "node_modules/", "android/", "ios/"],
   rules: {
     quotes: ["error", "double"],
-    "prettier/prettier": [
-      "error",
-      {
-        singleQuote: false,
-        trailingComma: "es5",
-        tabWidth: 2,
-        semi: true,
-      },
-    ],
   },
 };
