@@ -1,5 +1,7 @@
 // Mock react-native modules
-jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
+jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper", () => ({
+  default: {},
+}));
 
 // Mock AsyncStorage
 jest.mock("@react-native-async-storage/async-storage", () => ({
@@ -50,4 +52,6 @@ jest.mock("@react-native-firebase/firestore", () => ({
 }));
 
 // Silence the warning: Animated: `useNativeDriver` is not supported
-jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
+jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper", () => ({
+  default: {},
+}));

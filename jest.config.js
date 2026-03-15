@@ -7,4 +7,8 @@ module.exports = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   testMatch: ["**/__tests__/**/*.test.ts?(x)"],
   collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/**/*.d.ts"],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/backend/",
+  ],
 };
